@@ -10,6 +10,7 @@
 
 import type * as agents from "../agents.js";
 import type * as auth from "../auth.js";
+import type * as bonds from "../bonds.js";
 import type * as http from "../http.js";
 import type * as lib_error_messages from "../lib/error_messages.js";
 import type * as lib_permissions from "../lib/permissions.js";
@@ -30,6 +31,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   agents: typeof agents;
   auth: typeof auth;
+  bonds: typeof bonds;
   http: typeof http;
   "lib/error_messages": typeof lib_error_messages;
   "lib/permissions": typeof lib_permissions;

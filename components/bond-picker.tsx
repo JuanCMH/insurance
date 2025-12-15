@@ -5,44 +5,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Dispatch, SetStateAction } from "react";
+import { Doc, Id } from "@/convex/_generated/dataModel";
+import { PerformanceBondDataType } from "@/packages/bonds/types";
 
 interface BondPickerProps {
-  value?: string;
-  onChange?: (value: string) => void;
+  value?: Id<"bonds">;
+  onChange?: Dispatch<SetStateAction<Id<"bonds"> | undefined>>;
   placeholder?: string;
   disabled?: boolean;
-  selectedBonds?: string[];
+  bonds: Array<PerformanceBondDataType>;
 }
 
-const bondOptions = [
-  { value: "performance", label: "Garantía de Cumplimiento" },
-  { value: "advance", label: "Garantía de Anticipo" },
-];
-
 export function BondPicker({
+  bonds,
   value,
+  disabled,
   onChange,
   placeholder,
-  disabled,
-  selectedBonds,
 }: BondPickerProps) {
+  const onValueChange = (value: string) => {
+    if (onChange) {
+      onChange(value as Id<"bonds">);
+    }
+  };
+
   return (
-    <Select disabled={disabled} onValueChange={onChange} value={value}>
+    <Select disabled={disabled} onValueChange={onValueChange} value={value}>
       <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="flex max-h-48">
-        {bondOptions.map((option) => (
-          <SelectItem
-            key={option.value}
-            value={option.value}
-            className={
-              selectedBonds?.includes(option.value) ? "text-sky-500" : ""
-            }
-          >
-            {option.label}
+        {bonds?.map((bond) => (
+          <SelectItem key={bond.id} value={bond.id}>
+            {bond.name}
           </SelectItem>
         ))}
+        {bonds.length === 0 && (
+          <div className="p-2 text-sm text-muted-foreground text-center border border-dashed">
+            Los amparos que selecciones aparecerán aquí.
+          </div>
+        )}
       </SelectContent>
     </Select>
   );

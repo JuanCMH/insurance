@@ -57,6 +57,11 @@ const schema = defineSchema({
     workspaceId: v.id("workspaces"),
     ...permissionsSchema,
   }).index("workspaceId", ["workspaceId"]),
+  bonds: defineTable({
+    name: v.string(),
+    description: v.string(),
+    workspaceId: v.id("workspaces"),
+  }).index("workspaceId", ["workspaceId"]),
 });
 
 export default schema;

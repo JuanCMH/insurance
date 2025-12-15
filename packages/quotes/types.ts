@@ -8,14 +8,3 @@ export type ContractDataType = {
   contractStart: Date;
   contractEnd: Date;
 };
-
-export type BondDataType = {
-  name: string;
-  startDate: Date;
-  endDate: Date;
-  days: number;
-  months: number;
-  percentage: number;
-  insuredValue: number;
-  rate: number;
-};

@@ -11,18 +11,22 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getPdfContent } from "@/lib/extract-pdf";
 import { normalizePdfText } from "@/lib/normalize-pdf-text";
+import { BondDataType, PerformanceBondDataType } from "@/packages/bonds/types";
 import { useGetQuoteFromDoc } from "@/packages/quotes/api";
-import BidBondInfo from "@/packages/quotes/components/bid-bond-info";
-import BidBondResult from "@/packages/quotes/components/bid-bond-result";
+import BidBondInfo from "@/packages/bonds/components/bid-bond-info";
 import ContractInfo from "@/packages/quotes/components/contract-info";
-import PerformanceBondsInfo from "@/packages/quotes/components/performance-bonds-info";
-import { BondDataType, ContractDataType } from "@/packages/quotes/types";
-import { RiFileAi2Line, RiFileList3Fill } from "@remixicon/react";
+import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
+import { ContractDataType } from "@/packages/quotes/types";
+import { RiFileAi2Line, RiShieldCheckFill } from "@remixicon/react";
 import { useRef, useState } from "react";
 
 const QuotesPage = () => {
   const getQuoteFromDoc = useGetQuoteFromDoc();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [quoteType, setQuoteType] = useState<"bidBond" | "performanceBonds">(
+    "bidBond",
+  );
   const [contractData, setContractData] = useState<ContractDataType>({
     contractor: "",
     contractorId: "",
@@ -38,26 +42,27 @@ const QuotesPage = () => {
     name: "Seriedad de la oferta",
     startDate: new Date(),
     endDate: new Date(),
-    days: 0,
-    months: 0,
     percentage: 0,
     insuredValue: 0,
     rate: 0,
   });
 
   const [performanceBondsData, setPerformanceBondsData] = useState<
-    Array<BondDataType>
+    Array<PerformanceBondDataType>
   >([]);
 
   const extractPdfToLog = async (file: File) => {
     const result = await getPdfContent(file);
-    // console.log("Extracted PDF Text:", result);
-    // promt mus be reslt (string []) to only one string
-    const promt = normalizePdfText(result);
-    // console.log(result);
-    const quoteResponse = await getQuoteFromDoc({ promt });
+    const prompt = normalizePdfText(result);
+    const quoteResponse = await getQuoteFromDoc({ prompt });
 
     console.log("Quote Response:", quoteResponse);
+  };
+
+  const handleQuoteTypeChange = (value: string) => {
+    if (value === "bidBond" || value === "performanceBonds") {
+      setQuoteType(value);
+    }
   };
 
   return (
@@ -105,13 +110,13 @@ const QuotesPage = () => {
         />
       </div>
       <div className="p-2 border border-muted rounded-lg mx-2 mt-4 z-11 bg-card pb-2">
-        <Tabs defaultValue="bidBond">
+        <Tabs defaultValue={quoteType} onValueChange={handleQuoteTypeChange}>
           <header className="flex items-center justify-between gap-2">
             <div className="flex gap-2 items-center">
-              <RiFileList3Fill className="w-4 h-4 text-sky-500" />
-              <h1 className="text-lg font-semibold">Garantías</h1>
+              <RiShieldCheckFill className="size-4" />
+              <h1 className="text-lg font-semibold">Amparos</h1>
             </div>
-            <TabsList>
+            <TabsList className="h-8">
               <TabsTrigger value="bidBond">Seriedad</TabsTrigger>
               <TabsTrigger value="performanceBonds">Cumplimiento</TabsTrigger>
             </TabsList>
@@ -123,13 +128,13 @@ const QuotesPage = () => {
               bidBondData={bidBondData}
               setBidBondData={setBidBondData}
             />
-            <BidBondResult bidBondData={bidBondData} />
           </TabsContent>
           <TabsContent value="performanceBonds">
             <PerformanceBondsInfo
               contractData={contractData}
               performanceBondsData={performanceBondsData}
               setPerformanceBondsData={setPerformanceBondsData}
+              setQuoteType={setQuoteType}
             />
           </TabsContent>
         </Tabs>

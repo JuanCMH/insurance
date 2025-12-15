@@ -13,11 +13,24 @@ interface TaxPickerProps {
   disabled?: boolean;
 }
 
+const toOptionValue = (num: number) => {
+  const fixed = num.toFixed(2);
+  return fixed.replace(/\.0+$/, "").replace(/(\.[0-9]*?)0+$/, "$1");
+};
+
+const toOptionLabel = (num: number) => `${num.toFixed(2)}%`;
+
 const rateOptions = Array.from({ length: 36 }, (_, i) => {
-  const value = 0.05 + i * 0.01;
-  const text = value.toFixed(2);
-  return { value: text, label: `${text}%` };
+  const numeric = (5 + i) / 100;
+  return { value: toOptionValue(numeric), label: toOptionLabel(numeric) };
 });
+
+const normalizeValue = (value?: string) => {
+  if (!value) return undefined;
+  const num = Number(value);
+  if (!Number.isFinite(num)) return value;
+  return toOptionValue(num);
+};
 
 export function TaxPicker({
   value,
@@ -26,7 +39,11 @@ export function TaxPicker({
   disabled,
 }: TaxPickerProps) {
   return (
-    <Select disabled={disabled} onValueChange={onChange} value={value}>
+    <Select
+      disabled={disabled}
+      onValueChange={onChange}
+      value={normalizeValue(value)}
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

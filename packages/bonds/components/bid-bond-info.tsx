@@ -1,9 +1,8 @@
 import Bond from "./bond";
 import { BondDataType } from "../types";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { ContractDataType } from "../../quotes/types";
 import { getBondTotals } from "@/lib/get-bond-totals";
-import { differenceInCalendarDays } from "date-fns";
 import ResultsCard from "@/packages/quotes/components/results-card";
 
 interface BidBondDataProps {
@@ -17,10 +16,12 @@ const BidBondInfo = ({
   bidBondData,
   setBidBondData,
 }: BidBondDataProps) => {
+  const [expenses, setExpenses] = useState(0);
+  const [calculateExpensesTaxes, setCalculateExpensesTaxes] = useState(false);
   const bidBondTotals = getBondTotals(
     bidBondData.insuredValue,
     bidBondData.rate,
-    differenceInCalendarDays(bidBondData.endDate, bidBondData.startDate),
+    365,
   );
 
   return (
@@ -45,9 +46,13 @@ const BidBondInfo = ({
         setRate={(rate) => setBidBondData((p) => ({ ...p, rate }))}
       />
       <ResultsCard
+        expenses={expenses}
+        setExpenses={setExpenses}
         vat={bidBondTotals.vat}
         total={bidBondTotals.total}
         premium={bidBondTotals.premium}
+        calculateExpensesTaxes={calculateExpensesTaxes}
+        setCalculateExpensesTaxes={setCalculateExpensesTaxes}
       />
     </>
   );

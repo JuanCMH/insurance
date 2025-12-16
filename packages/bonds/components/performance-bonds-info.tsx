@@ -19,6 +19,7 @@ import { PerformanceBondsList } from "./performance-bonds-list";
 import ResultsCard from "@/packages/quotes/components/results-card";
 import { getBondTotals } from "@/lib/get-bond-totals";
 import { differenceInCalendarDays } from "date-fns";
+import { getQuoteTotals } from "@/lib/get-quote-totals";
 
 interface PerformanceBondsInfoProps {
   contractData: ContractDataType;
@@ -35,8 +36,10 @@ const PerformanceBondsInfo = ({
   setQuoteType,
   setPerformanceBondsData,
 }: PerformanceBondsInfoProps) => {
-  const [bodsModalOpen, setBondsModalOpen] = useState(false);
+  const [expenses, setExpenses] = useState(0);
+  const [calculateExpensesTaxes, setCalculateExpensesTaxes] = useState(false);
   const [listOpen, setListOpen] = useState(false);
+  const [bodsModalOpen, setBondsModalOpen] = useState(false);
   const [selectedBondId, setSelectedBondId] = useState<Id<"bonds"> | undefined>(
     undefined,
   );
@@ -52,6 +55,16 @@ const PerformanceBondsInfo = ({
       selectedBond?.endDate || new Date(),
       selectedBond?.startDate || new Date(),
     ),
+  );
+
+  const results = getQuoteTotals(
+    performanceBondsData.map((data) => {
+      return {
+        insuredValue: data.insuredValue,
+        rate: data.rate,
+        days: differenceInCalendarDays(data.endDate, data.startDate),
+      };
+    }),
   );
 
   return (
@@ -138,19 +151,33 @@ const PerformanceBondsInfo = ({
               }}
             />
             <ResultsCard
-              withExpenses={false}
               vat={performanceBondTotals.vat}
               total={performanceBondTotals.total}
               premium={performanceBondTotals.premium}
             />
           </>
         )}
+        {!selectedBond && (
+          <ResultsCard
+            vat={results.vat}
+            total={results.total}
+            premium={results.premium}
+            expenses={expenses}
+            setExpenses={setExpenses}
+            calculateExpensesTaxes={calculateExpensesTaxes}
+            setCalculateExpensesTaxes={setCalculateExpensesTaxes}
+          />
+        )}
         <PerformanceBondsList
           open={listOpen}
           setOpen={setListOpen}
-          performanceBondsData={performanceBondsData}
+          expenses={expenses}
+          setExpenses={setExpenses}
           setQuoteType={setQuoteType}
           setSelectedBondId={setSelectedBondId}
+          performanceBondsData={performanceBondsData}
+          calculateExpensesTaxes={calculateExpensesTaxes}
+          setCalculateExpensesTaxes={setCalculateExpensesTaxes}
         />
       </div>
       <BondsModal

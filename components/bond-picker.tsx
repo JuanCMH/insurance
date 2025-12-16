@@ -31,21 +31,21 @@ export function BondPicker({
   };
 
   return (
-    <Select disabled={disabled} onValueChange={onValueChange} value={value}>
+    <Select
+      disabled={disabled}
+      onValueChange={onValueChange}
+      value={value || "total"}
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="flex max-h-48">
+        <SelectItem value="total">Total</SelectItem>
         {bonds?.map((bond) => (
           <SelectItem key={bond.id} value={bond.id}>
             {bond.name}
           </SelectItem>
         ))}
-        {bonds.length === 0 && (
-          <div className="p-2 text-sm text-muted-foreground text-center border border-dashed">
-            Los amparos que selecciones aparecerán aquí.
-          </div>
-        )}
       </SelectContent>
     </Select>
   );

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CurrencyInput } from "@/components/currency-input";
@@ -8,21 +8,32 @@ interface ResultsCardProps {
   vat: number;
   total: number;
   premium: number;
-  withExpenses?: boolean;
+  expenses?: number;
+  setExpenses?: Dispatch<SetStateAction<number>>;
+  calculateExpensesTaxes?: boolean;
+  setCalculateExpensesTaxes?: Dispatch<SetStateAction<boolean>>;
 }
 
 const ResultsCard = ({
   vat,
   total,
   premium,
-  withExpenses = true,
+  expenses,
+  setExpenses,
+  calculateExpensesTaxes = false,
+  setCalculateExpensesTaxes,
 }: ResultsCardProps) => {
-  const [expenses, setExpenses] = useState(0);
-  const [calculateExpensesTaxes, setCalculateExpensesTaxes] = useState(false);
+  const withExpenses =
+    typeof expenses !== "undefined" && typeof setExpenses !== "undefined";
+
+  const withCalculateExpensesTaxes =
+    withExpenses &&
+    typeof calculateExpensesTaxes !== "undefined" &&
+    typeof setCalculateExpensesTaxes !== "undefined";
 
   const totalWithExpenses = calculateExpensesTaxes
-    ? total + expenses + expenses * 0.19
-    : total + expenses;
+    ? total + (expenses || 0) + (expenses || 0) * 0.19
+    : total + (expenses || 0);
 
   return (
     <div className="p-2 border border-muted rounded-lg mt-4 z-10 bg-sky-700 text-white pb-2">
@@ -75,7 +86,7 @@ const ResultsCard = ({
           />
         </div>
       </div>
-      {withExpenses && (
+      {withCalculateExpensesTaxes && (
         <div className="flex items-center space-x-2 mt-2">
           <Switch
             id="bid-bond-calculate-taxes"

@@ -62,6 +62,31 @@ const schema = defineSchema({
     description: v.string(),
     workspaceId: v.id("workspaces"),
   }).index("workspaceId", ["workspaceId"]),
+  quotes: defineTable({
+    contractor: v.string(),
+    contractorId: v.string(),
+    contractee: v.string(),
+    contracteeId: v.string(),
+    contractType: v.string(),
+    contractValue: v.number(),
+    contractStart: v.number(),
+    contractEnd: v.number(),
+    expenses: v.number(),
+    calculateExpensesTaxes: v.boolean(),
+    quoteType: v.union(v.literal("bidBond"), v.literal("performanceBonds")),
+    workspaceId: v.id("workspaces"),
+  }).index("workspaceId", ["workspaceId"]),
+  quoteBonds: defineTable({
+    name: v.string(),
+    startDate: v.number(),
+    endDate: v.number(),
+    percentage: v.number(),
+    insuredValue: v.number(),
+    rate: v.number(),
+    workspaceId: v.id("workspaces"),
+    quoteId: v.id("quotes"),
+    bondId: v.optional(v.id("bonds")),
+  }).index("quoteId", ["quoteId"]),
 });
 
 export default schema;

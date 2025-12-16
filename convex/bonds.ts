@@ -1,8 +1,7 @@
 import { v } from "convex/values";
-import { api } from "./_generated/api";
+import { populateMember } from "./roles";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { populateMember } from "./roles";
 
 export const update = mutation({
   args: {

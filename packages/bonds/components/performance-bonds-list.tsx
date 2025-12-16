@@ -17,7 +17,11 @@ import { Id } from "@/convex/_generated/dataModel";
 interface PerformanceBondsListProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  expenses: number;
+  setExpenses: Dispatch<SetStateAction<number>>;
   performanceBondsData: Array<PerformanceBondDataType>;
+  calculateExpensesTaxes?: boolean;
+  setCalculateExpensesTaxes?: Dispatch<SetStateAction<boolean>>;
   setQuoteType: Dispatch<SetStateAction<"bidBond" | "performanceBonds">>;
   setSelectedBondId: Dispatch<SetStateAction<Id<"bonds"> | undefined>>;
 }
@@ -25,6 +29,10 @@ interface PerformanceBondsListProps {
 export const PerformanceBondsList = ({
   open,
   setOpen,
+  expenses,
+  setExpenses,
+  calculateExpensesTaxes,
+  setCalculateExpensesTaxes,
   setQuoteType,
   setSelectedBondId,
   performanceBondsData,
@@ -66,6 +74,10 @@ export const PerformanceBondsList = ({
             vat={results.vat}
             total={results.total}
             premium={results.premium}
+            expenses={expenses}
+            setExpenses={setExpenses}
+            calculateExpensesTaxes={calculateExpensesTaxes}
+            setCalculateExpensesTaxes={setCalculateExpensesTaxes}
           />
         </footer>
       </SheetContent>

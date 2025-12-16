@@ -11,20 +11,38 @@ const quoteAgent = new Agent(components.agent, {
   languageModel: google("gemini-2.5-flash"),
   textEmbeddingModel: google.textEmbeddingModel("gemini-embedding-001"),
   instructions: `
-    Instruction:
-    You will receive a PDF document as input. Extract all relevant fields and return them as a single JSON object.
+    GLOBAL OUTPUT FORMAT (MANDATORY)
+    - Output MUST be ONLY a valid JSON object.
+    - The response MUST start with "{" and end with "}".
+    - Do NOT use Markdown (no \`\`\`), no labels, no explanations, no extra text.
+    - Root MUST be a JSON object (never an array).
+    - If something is missing, use null (do not infer).
 
-    Return only the JSON object. Do not include explanations, assumptions, summaries, or any additional text.
+    TASK
+    You will receive a PDF document as input. Extract all relevant fields and return them as a single JSON object that matches EXACTLY the schema below.
 
-    If a field cannot be found, set its value to null.
+    BOND TYPE RULES (TWO POSSIBLE STRUCTURES)
 
-    There are two possible structures: **bid bond** and **performance bond**.
-    - A **bid bond** contains only one warranty; therefore, it must return a single bondData object inside the "bonds" array.
-    - A **performance bond** may contain multiple warranties; therefore, return an array of bondData objects under "bonds".
+    1) BID BOND
+    - Extract ONLY contract information into "contractData".
+    - "bonds" MUST be an empty array: [].
+    - Do NOT infer, generate, or assume any bond data.
 
-    Both structures must always include the "contractData" object.
+    2) PERFORMANCE BOND
+    - Extract contract information into "contractData" AND all related warranties into "bonds".
+    - Each item in "bonds" MUST be an object that includes an "id" field.
+    - Before processing the PDF, you will receive:
+      a) the list of valid performance bond ids, and
+      b) the quote type.
+    - Use ONLY those ids exactly as provided; do NOT create new ids.
+    - Only include bond objects that you can map to one of the valid ids; otherwise omit them.
+    - The default rate for all performance bonds is 0.40.
 
-    JSON Structure:
+    DATE + NUMBER FORMATTING
+    - Dates must be ISO 8601 strings (YYYY-MM-DD) when possible; otherwise null.
+    - "contractValue", "percentage", and "rate" must be numbers (no currency symbols, no percent signs). If not found, null.
+
+    OUTPUT SCHEMA (MUST MATCH EXACTLY)
     {
       "contractData": {
         "contractor": string | null,
@@ -33,14 +51,15 @@ const quoteAgent = new Agent(components.agent, {
         "contracteeId": string | null,
         "contractType": string | null,
         "contractValue": number | null,
-        "contractStart": string (ISO 8601) | null,
-        "contractEnd": string (ISO 8601) | null
+        "contractStart": string | null,
+        "contractEnd": string | null
       },
       "bonds": [
         {
+          "id": string | null,
           "name": string | null,
-          "startDate": string (ISO 8601) | null,
-          "endDate": string (ISO 8601) | null,
+          "startDate": string | null,
+          "endDate": string | null,
           "percentage": number | null,
           "rate": number | null
         }

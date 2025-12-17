@@ -1,10 +1,13 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
+export const verboseDateTime = (date: Date) =>
+  format(date, "PPPPpppp", { locale: es });
 export const fullDateTime = (date: Date) =>
   format(date, "dd/MM/yy HH:mm", { locale: es });
 export const shortDateTime = (date: Date) =>
   format(date, "dd/MM HH:mm", { locale: es });
+export const verboseDate = (date: Date) => format(date, "PPPP", { locale: es });
 export const fullDate = (date: Date) =>
   format(date, "dd/MM/yy", { locale: es });
 export const shortDate = (date: Date) => format(date, "dd/MM", { locale: es });

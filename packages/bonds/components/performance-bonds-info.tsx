@@ -20,6 +20,9 @@ import ResultsCard from "@/packages/quotes/components/results-card";
 import { getBondTotals } from "@/lib/get-bond-totals";
 import { differenceInCalendarDays } from "date-fns";
 import { getQuoteTotals } from "@/lib/get-quote-totals";
+import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { useCreateQuote } from "@/packages/quotes/api";
+import { toast } from "sonner";
 
 interface PerformanceBondsInfoProps {
   contractData: ContractDataType;
@@ -28,6 +31,7 @@ interface PerformanceBondsInfoProps {
     SetStateAction<Array<PerformanceBondDataType>>
   >;
   setQuoteType: Dispatch<SetStateAction<"bidBond" | "performanceBonds">>;
+  resetForm: () => void;
 }
 
 const PerformanceBondsInfo = ({
@@ -35,7 +39,11 @@ const PerformanceBondsInfo = ({
   performanceBondsData,
   setQuoteType,
   setPerformanceBondsData,
+  resetForm,
 }: PerformanceBondsInfoProps) => {
+  const workspaceId = useWorkspaceId();
+  const { mutate: createQuote, isPending: isCreatingQuote } = useCreateQuote();
+
   const [expenses, setExpenses] = useState(0);
   const [calculateExpensesTaxes, setCalculateExpensesTaxes] = useState(false);
   const [listOpen, setListOpen] = useState(false);
@@ -67,8 +75,59 @@ const PerformanceBondsInfo = ({
     }),
   );
 
+  const handleCreateQuote = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    createQuote(
+      {
+        workspaceId,
+        quoteType: "performanceBonds",
+        quoteBonds: performanceBondsData.map((bond) => ({
+          name: bond.name,
+          startDate: bond.startDate.getTime(),
+          endDate: bond.endDate.getTime(),
+          percentage: bond.percentage,
+          insuredValue: bond.insuredValue,
+          rate: bond.rate,
+          bondId: bond.id,
+        })),
+        expenses,
+        calculateExpensesTaxes,
+        contractee: contractData.contractee,
+        contracteeId: contractData.contracteeId,
+        contractor: contractData.contractor,
+        contractorId: contractData.contractorId,
+        contractType: contractData.contractType,
+        contractValue: contractData.contractValue,
+        contractStart: contractData.contractStart.getTime(),
+        contractEnd: contractData.contractEnd.getTime(),
+      },
+      {
+        onSuccess: () => {
+          resetForm();
+          setExpenses(0);
+          setCalculateExpensesTaxes(false);
+          toast.success("Cotización creada exitosamente");
+        },
+        onError: () => {
+          toast.error("Error al crear la cotización");
+        },
+      },
+    );
+  };
+
+  const isValidQuote =
+    performanceBondsData.length > 0 &&
+    performanceBondsData.every((bond) => {
+      const hasValidValues =
+        bond.percentage > 0 && bond.insuredValue > 0 && bond.rate > 0;
+      const days = differenceInCalendarDays(bond.endDate, bond.startDate);
+      const hasValidDates = days > 0;
+
+      return hasValidValues && hasValidDates;
+    });
+
   return (
-    <>
+    <form onSubmit={handleCreateQuote}>
       <div className="space-y-4">
         <div className="flex gap-2">
           <BondPicker
@@ -187,7 +246,12 @@ const PerformanceBondsInfo = ({
         performanceBondsData={performanceBondsData}
         setPerformanceBondsData={setPerformanceBondsData}
       />
-    </>
+      <footer className="flex justify-end mt-4">
+        <Button type="submit" disabled={isCreatingQuote || !isValidQuote}>
+          Crear Cotización
+        </Button>
+      </footer>
+    </form>
   );
 };
 

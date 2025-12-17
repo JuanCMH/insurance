@@ -193,6 +193,7 @@ export const create = mutation({
 export const getByWorkspace = query({
   args: {
     workspaceId: v.id("workspaces"),
+    month: v.string(), // "yyyy-MM"
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -201,9 +202,20 @@ export const getByWorkspace = query({
     const member = await populateMember(ctx, userId, args.workspaceId);
     if (!member) return [];
 
+    const [year, month] = args.month.split("-").map(Number);
+
+    const monthStart = Date.UTC(year, month - 1, 1);
+    const monthEnd = Date.UTC(year, month, 1);
+
     const quotes = await ctx.db
       .query("quotes")
       .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("_creationTime"), monthStart),
+          q.lt(q.field("_creationTime"), monthEnd),
+        ),
+      )
       .collect();
 
     return quotes;

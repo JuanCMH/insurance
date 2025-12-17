@@ -9,7 +9,7 @@ interface WorkspaceLayoutProps {
 
 const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <WorkspaceSidebar />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>

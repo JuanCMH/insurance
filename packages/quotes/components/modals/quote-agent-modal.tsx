@@ -30,6 +30,7 @@ import { string2Object } from "@/lib/string-to-object";
 import { addMonths } from "date-fns";
 import { useGetBondsByWorkspace } from "@/packages/bonds/api";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { estimateTokens, MAX_TOKENS } from "@/lib/token-counter";
 
 interface QuoteAgentModalProps {
   open: boolean;
@@ -71,7 +72,22 @@ export const QuoteAgentModal = ({
     e.preventDefault();
     if (!file) return;
 
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("El archivo no puede superar los 10MB");
+      return;
+    }
+
     const result = await getPdfContent(file);
+    const text = normalizePdfText(result);
+
+    if (estimateTokens(text) > MAX_TOKENS) {
+      toast.error(
+        `El documento es demasiado extenso (aprox. ${estimateTokens(
+          text,
+        )} tokens). El máximo permitido es ${MAX_TOKENS}.`,
+      );
+      return;
+    }
 
     const performanceBonds =
       bonds?.map((bond) => ({
@@ -81,8 +97,10 @@ export const QuoteAgentModal = ({
 
     const prompt =
       quoteType === "performanceBonds"
-        ? `Quote type: ${quoteType}, Performance Bonds: ${JSON.stringify(performanceBonds)}, PDF: ${normalizePdfText(result)}`
-        : `Quote type: ${quoteType}, PDF: ${normalizePdfText(result)}`;
+        ? `Quote type: ${quoteType}, Performance Bonds: ${JSON.stringify(
+            performanceBonds,
+          )}, PDF: ${text}`
+        : `Quote type: ${quoteType}, PDF: ${text}`;
 
     getQuote(
       { prompt },

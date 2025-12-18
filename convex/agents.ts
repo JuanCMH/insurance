@@ -21,6 +21,9 @@ const quoteAgent = new Agent(components.agent, {
     TASK
     You will receive a PDF document as input. Extract all relevant fields and return them as a single JSON object that matches EXACTLY the schema below.
 
+    FIELD EXTRACTION RULES
+    - "agreement": This corresponds to the "Object of the Contract" (Objeto del Contrato). It MUST be a direct extract from the document section. Do NOT infer or summarize. If the section does not exist, return null.
+
     BOND TYPE RULES (TWO POSSIBLE STRUCTURES)
 
     1) BID BOND
@@ -50,6 +53,7 @@ const quoteAgent = new Agent(components.agent, {
         "contractee": string | null,
         "contracteeId": string | null,
         "contractType": string | null,
+        "agreement": string | null,
         "contractValue": number | null,
         "contractStart": string | null,
         "contractEnd": string | null

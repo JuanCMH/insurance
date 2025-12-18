@@ -5,6 +5,7 @@ export type BondDataType = {
   name: string;
   startDate: Date;
   endDate: Date;
+  expiryDate?: Date;
   percentage: number;
   insuredValue: number;
   rate: number;

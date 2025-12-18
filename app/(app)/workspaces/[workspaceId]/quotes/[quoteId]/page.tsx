@@ -56,6 +56,7 @@ const QuoteIdPage = () => {
     contractee: "",
     contracteeId: "",
     contractType: "",
+    agreement: "",
     contractValue: 0,
     contractStart: new Date(),
     contractEnd: new Date(),
@@ -64,6 +65,7 @@ const QuoteIdPage = () => {
     name: "Seriedad de la oferta",
     startDate: new Date(),
     endDate: new Date(),
+    expiryDate: undefined,
     percentage: 0,
     insuredValue: 0,
     rate: 0,
@@ -81,6 +83,7 @@ const QuoteIdPage = () => {
         contractee: quote.contractee,
         contracteeId: quote.contracteeId,
         contractType: quote.contractType,
+        agreement: quote.agreement,
         contractValue: quote.contractValue,
         contractStart: new Date(quote.contractStart),
         contractEnd: new Date(quote.contractEnd),
@@ -94,6 +97,7 @@ const QuoteIdPage = () => {
         name: bond.name,
         startDate: new Date(bond.startDate),
         endDate: new Date(bond.endDate),
+        expiryDate: bond.expiryDate ? new Date(bond.expiryDate) : undefined,
         percentage: bond.percentage,
         insuredValue: bond.insuredValue,
         rate: bond.rate,
@@ -119,6 +123,25 @@ const QuoteIdPage = () => {
 
   const handleUpdateBidQuote = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const requiredFields = [
+      contractData.contractee,
+      contractData.contractor,
+      contractData.contractValue,
+      contractData.contractStart,
+      contractData.contractEnd,
+      bidBondData.startDate,
+      bidBondData.endDate,
+      bidBondData.expiryDate,
+      bidBondData.percentage,
+      bidBondData.insuredValue,
+      bidBondData.rate,
+    ];
+
+    if (requiredFields.some((field) => !field)) {
+      toast.error("Por favor completa todos los campos obligatorios.");
+      return;
+    }
+
     updateQuote(
       {
         id: quoteId,
@@ -128,6 +151,7 @@ const QuoteIdPage = () => {
             name: bidBondData.name,
             startDate: bidBondData.startDate.getTime(),
             endDate: bidBondData.endDate.getTime(),
+            expiryDate: bidBondData.expiryDate?.getTime(),
             percentage: bidBondData.percentage,
             insuredValue: bidBondData.insuredValue,
             rate: bidBondData.rate,
@@ -140,6 +164,7 @@ const QuoteIdPage = () => {
         contractor: contractData.contractor,
         contractorId: contractData.contractorId,
         contractType: contractData.contractType,
+        agreement: contractData.agreement,
         contractValue: contractData.contractValue,
         contractStart: contractData.contractStart.getTime(),
         contractEnd: contractData.contractEnd.getTime(),
@@ -160,6 +185,26 @@ const QuoteIdPage = () => {
     e: React.FormEvent<HTMLFormElement>,
   ) => {
     e.preventDefault();
+    const requiredFields = [
+      contractData.contractee,
+      contractData.contractor,
+      contractData.contractValue,
+      contractData.contractStart,
+      contractData.contractEnd,
+      ...performanceBondsData.flatMap((bond) => [
+        bond.startDate,
+        bond.endDate,
+        bond.percentage,
+        bond.insuredValue,
+        bond.rate,
+      ]),
+    ];
+
+    if (requiredFields.some((field) => !field)) {
+      toast.error("Por favor completa todos los campos obligatorios.");
+      return;
+    }
+
     updateQuote(
       {
         id: quoteId,
@@ -180,6 +225,7 @@ const QuoteIdPage = () => {
         contractor: contractData.contractor,
         contractorId: contractData.contractorId,
         contractType: contractData.contractType,
+        agreement: contractData.agreement,
         contractValue: contractData.contractValue,
         contractStart: contractData.contractStart.getTime(),
         contractEnd: contractData.contractEnd.getTime(),

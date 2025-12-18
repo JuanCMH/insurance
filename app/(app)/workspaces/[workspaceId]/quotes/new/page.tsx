@@ -12,13 +12,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { BondDataType } from "@/packages/bonds/types";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ContractDataType } from "@/packages/quotes/types";
 import BidBondInfo from "@/packages/bonds/components/bid-bond-info";
 import { RiAiGenerate2, RiShieldCheckFill } from "@remixicon/react";
 import ContractInfo from "@/packages/quotes/components/contract-info";
-import { BondDataType } from "@/packages/bonds/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
 import { QuoteAgentModal } from "@/packages/quotes/components/modals/quote-agent-modal";
@@ -38,6 +38,7 @@ const NewQuotePage = () => {
     contractee: "",
     contracteeId: "",
     contractType: "",
+    agreement: "",
     contractValue: 0,
     contractStart: new Date(),
     contractEnd: new Date(),
@@ -47,6 +48,7 @@ const NewQuotePage = () => {
     name: "Seriedad de la oferta",
     startDate: new Date(),
     endDate: new Date(),
+    expiryDate: undefined,
     percentage: 0,
     insuredValue: 0,
     rate: 0,
@@ -69,6 +71,7 @@ const NewQuotePage = () => {
       contractee: "",
       contracteeId: "",
       contractType: "",
+      agreement: "",
       contractValue: 0,
       contractStart: new Date(),
       contractEnd: new Date(),
@@ -77,6 +80,7 @@ const NewQuotePage = () => {
       name: "Seriedad de la oferta",
       startDate: new Date(),
       endDate: new Date(),
+      expiryDate: new Date(),
       percentage: 0,
       insuredValue: 0,
       rate: 0,
@@ -86,6 +90,25 @@ const NewQuotePage = () => {
 
   const handleCreateBidQuote = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const requiredFields = [
+      contractData.contractee,
+      contractData.contractor,
+      contractData.contractValue,
+      contractData.contractStart,
+      contractData.contractEnd,
+      bidBondData.startDate,
+      bidBondData.endDate,
+      bidBondData.expiryDate,
+      bidBondData.percentage,
+      bidBondData.insuredValue,
+      bidBondData.rate,
+    ];
+
+    if (requiredFields.some((field) => !field)) {
+      toast.error("Por favor completa todos los campos obligatorios.");
+      return;
+    }
+
     createQuote(
       {
         workspaceId,
@@ -95,6 +118,7 @@ const NewQuotePage = () => {
             name: bidBondData.name,
             startDate: bidBondData.startDate.getTime(),
             endDate: bidBondData.endDate.getTime(),
+            expiryDate: bidBondData.expiryDate?.getTime(),
             percentage: bidBondData.percentage,
             insuredValue: bidBondData.insuredValue,
             rate: bidBondData.rate,
@@ -107,6 +131,7 @@ const NewQuotePage = () => {
         contractor: contractData.contractor,
         contractorId: contractData.contractorId,
         contractType: contractData.contractType,
+        agreement: contractData.agreement,
         contractValue: contractData.contractValue,
         contractStart: contractData.contractStart.getTime(),
         contractEnd: contractData.contractEnd.getTime(),
@@ -129,6 +154,26 @@ const NewQuotePage = () => {
     e: React.FormEvent<HTMLFormElement>,
   ) => {
     e.preventDefault();
+    const requiredFields = [
+      contractData.contractee,
+      contractData.contractor,
+      contractData.contractValue,
+      contractData.contractStart,
+      contractData.contractEnd,
+      ...performanceBondsData.flatMap((bond) => [
+        bond.startDate,
+        bond.endDate,
+        bond.percentage,
+        bond.insuredValue,
+        bond.rate,
+      ]),
+    ];
+
+    if (requiredFields.some((field) => !field)) {
+      toast.error("Por favor completa todos los campos obligatorios.");
+      return;
+    }
+
     createQuote(
       {
         workspaceId,
@@ -149,6 +194,7 @@ const NewQuotePage = () => {
         contractor: contractData.contractor,
         contractorId: contractData.contractorId,
         contractType: contractData.contractType,
+        agreement: contractData.agreement,
         contractValue: contractData.contractValue,
         contractStart: contractData.contractStart.getTime(),
         contractEnd: contractData.contractEnd.getTime(),

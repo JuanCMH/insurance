@@ -26,6 +26,7 @@ export const update = mutation({
     contractStart: v.number(),
     contractEnd: v.number(),
     expenses: v.number(),
+    agreement: v.string(),
     calculateExpensesTaxes: v.boolean(),
     quoteType: v.union(v.literal("bidBond"), v.literal("performanceBonds")),
     quoteBonds: v.array(
@@ -33,6 +34,7 @@ export const update = mutation({
         name: v.string(),
         startDate: v.number(),
         endDate: v.number(),
+        expiryDate: v.optional(v.number()),
         percentage: v.number(),
         insuredValue: v.number(),
         rate: v.number(),
@@ -61,6 +63,7 @@ export const update = mutation({
       contractStart: args.contractStart,
       contractEnd: args.contractEnd,
       expenses: args.expenses,
+      agreement: args.agreement,
       calculateExpensesTaxes: args.calculateExpensesTaxes,
       quoteType: args.quoteType,
     });
@@ -132,6 +135,7 @@ export const create = mutation({
     contractStart: v.number(),
     contractEnd: v.number(),
     expenses: v.number(),
+    agreement: v.string(),
     calculateExpensesTaxes: v.boolean(),
     quoteType: v.union(v.literal("bidBond"), v.literal("performanceBonds")),
     quoteBonds: v.array(
@@ -139,6 +143,7 @@ export const create = mutation({
         name: v.string(),
         startDate: v.number(),
         endDate: v.number(),
+        expiryDate: v.optional(v.number()),
         percentage: v.number(),
         insuredValue: v.number(),
         rate: v.number(),
@@ -169,6 +174,7 @@ export const create = mutation({
       expenses: args.expenses,
       calculateExpensesTaxes: args.calculateExpensesTaxes,
       quoteType: args.quoteType,
+      agreement: args.agreement,
       workspaceId: args.workspaceId,
     });
 
@@ -177,6 +183,7 @@ export const create = mutation({
         name: qb.name,
         startDate: qb.startDate,
         endDate: qb.endDate,
+        expiryDate: qb.expiryDate,
         percentage: qb.percentage,
         insuredValue: qb.insuredValue,
         rate: qb.rate,

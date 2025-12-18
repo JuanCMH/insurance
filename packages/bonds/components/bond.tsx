@@ -5,6 +5,7 @@ import { TaxPicker } from "@/components/tax-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sanitizeDecimal, sanitizeInteger } from "@/lib/sanitize";
+import { cn } from "@/lib/utils";
 import { ContractDataType } from "@/packages/quotes/types";
 import {
   isAfter,
@@ -24,6 +25,7 @@ interface BondProps {
   rate: number;
   setStartDate: (date: Date) => void;
   setEndDate: (date: Date) => void;
+  setExpiryDate?: (date: Date) => void;
   setPercentage: (percentage: number) => void;
   setInsuredValue: (insuredValue: number) => void;
   setRate: (rate: number) => void;
@@ -44,6 +46,7 @@ const Bond = ({
   setInsuredValue,
   setRate,
   readOnly = false,
+  setExpiryDate,
 }: BondProps) => {
   const handleStartDateChange = (date: Date) => {
     if (isAfter(date, endDate)) return;
@@ -100,7 +103,7 @@ const Bond = ({
     <div className="grid grid-cols-4 gap-2">
       <div className="grid w-full items-center gap-1">
         <Label htmlFor="bond-start" className="text-xs">
-          DESDE
+          DESDE*
         </Label>
         <DatePicker
           readOnly={readOnly}
@@ -110,7 +113,7 @@ const Bond = ({
       </div>
       <div className="grid w-full items-center gap-1">
         <Label htmlFor="bond-end" className="text-xs">
-          HASTA
+          HASTA*
         </Label>
         <DatePicker
           readOnly={readOnly}
@@ -118,6 +121,18 @@ const Bond = ({
           onSelect={(date) => date && handleEndDateChange(date)}
         />
       </div>
+      {setExpiryDate !== undefined && (
+        <div className="grid w-full items-center gap-1">
+          <Label htmlFor="bond-expiry" className="text-xs">
+            VENCIMIENTO*
+          </Label>
+          <DatePicker
+            date={endDate}
+            readOnly={readOnly}
+            onSelect={(date) => date && setExpiryDate(date)}
+          />
+        </div>
+      )}
       <Field
         min={0}
         step={1}
@@ -160,7 +175,7 @@ const Bond = ({
         min={0}
         max={100}
         step={0.01}
-        label="PORCENTAJE %"
+        label="PORCENTAJE %*"
         type="number"
         placeholder="10"
         readOnly={readOnly}
@@ -173,9 +188,14 @@ const Bond = ({
           if (["-", "+", "e", "E", ","].includes(e.key)) e.preventDefault();
         }}
       />
-      <div className="grid w-full items-center gap-1 col-span-2">
+      <div
+        className={cn(
+          "grid w-full items-center gap-1",
+          setExpiryDate ? "col-span-1" : "col-span-2",
+        )}
+      >
         <Label htmlFor="bond-insured-value" className="text-xs">
-          VALOR ASEGURADO
+          VALOR ASEGURADO*
         </Label>
         <CurrencyInput
           readOnly={readOnly}
@@ -187,7 +207,7 @@ const Bond = ({
       </div>
       <div className="grid w-full items-center gap-1">
         <Label htmlFor="bond-rate" className="text-xs">
-          TASA %
+          TASA %*
         </Label>
         <TaxPicker
           placeholder="0"

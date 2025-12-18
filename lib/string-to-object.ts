@@ -18,6 +18,7 @@ type AgentPayload = {
     contractee?: unknown;
     contracteeId?: unknown;
     contractType?: unknown;
+    agreement?: unknown;
     contractValue?: unknown;
     contractStart?: unknown;
     contractEnd?: unknown;
@@ -58,6 +59,7 @@ export const string2Object = (
         contractee: "",
         contracteeId: "",
         contractType: "",
+        agreement: "",
         contractValue: 0,
         contractStart: new Date(),
         contractEnd: new Date(),
@@ -76,6 +78,7 @@ export const string2Object = (
       contractee: "",
       contracteeId: "",
       contractType: "",
+      agreement: "",
       contractValue: 0,
       contractStart: new Date(),
       contractEnd: new Date(),
@@ -100,6 +103,9 @@ export const string2Object = (
 
     if (isNonEmptyString(c.contractType))
       data.contractData.contractType = c.contractType;
+
+    if (isNonEmptyString(c.agreement))
+      data.contractData.agreement = c.agreement;
 
     if (isPositiveNumber(c.contractValue))
       data.contractData.contractValue = c.contractValue;

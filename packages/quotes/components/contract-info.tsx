@@ -8,6 +8,7 @@ import { Dispatch, SetStateAction } from "react";
 import { isAfter, isBefore } from "date-fns";
 import { RiContractFill } from "@remixicon/react";
 import { Field } from "@/components/field";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ContractInfoProps {
   readOnly?: boolean;
@@ -48,7 +49,7 @@ const ContractInfo = ({
       <Separator className="my-2" />
       <div className="mt-2 grid grid-cols-4 gap-2">
         <Field
-          label="AFIANZADO/CONTRATISTA"
+          label="AFIANZADO/CONTRATISTA*"
           htmlFor="contractor"
           placeholder="Luis Salamanca"
           value={contractData.contractor}
@@ -75,7 +76,7 @@ const ContractInfo = ({
           readOnly={readOnly}
         />
         <Field
-          label="ASEGURADO-BENEFICIARIO/CONTRATANTE"
+          label="ASEGURADO-BENEFICIARIO/CONTRATANTE*"
           htmlFor="contractee"
           placeholder="Juan Pérez"
           value={contractData.contractee}
@@ -116,7 +117,7 @@ const ContractInfo = ({
         />
         <div className="grid w-full items-center gap-1">
           <Label htmlFor="contract-value" className="text-xs">
-            VALOR DEL CONTRATO
+            VALOR DEL CONTRATO*
           </Label>
           <CurrencyInput
             placeholder="$200.000.000"
@@ -131,7 +132,7 @@ const ContractInfo = ({
         </div>
         <div className="grid w-full items-center gap-1">
           <Label htmlFor="contract-start" className="text-xs">
-            INICIO
+            INICIO*
           </Label>
           <DatePicker
             readOnly={readOnly}
@@ -141,12 +142,31 @@ const ContractInfo = ({
         </div>
         <div className="grid w-full items-center gap-1">
           <Label htmlFor="contract-end" className="text-xs">
-            FINALIZACIÓN
+            FINALIZACIÓN*
           </Label>
           <DatePicker
             readOnly={readOnly}
             date={contractData.contractEnd}
             onSelect={(date) => date && handleEndDateChange(date)}
+          />
+        </div>
+        <div className="grid w-full items-center gap-1 col-span-4">
+          <Label htmlFor="agreement" className="text-xs">
+            OBJETO
+          </Label>
+          <Textarea
+            id="agreement"
+            maxLength={200}
+            readOnly={readOnly}
+            className="resize-none h-24"
+            placeholder="Descripción del objeto"
+            value={contractData.agreement}
+            onChange={(e) =>
+              setContractData((prev) => ({
+                ...prev,
+                agreement: e.target.value,
+              }))
+            }
           />
         </div>
       </div>

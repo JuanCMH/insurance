@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -15,22 +16,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { addMonths } from "date-fns";
 import { Label } from "@/components/ui/label";
+import { ContractDataType } from "../../types";
 import { useGetQuoteFromDoc } from "../../api";
 import { Button } from "@/components/ui/button";
 import { getPdfContent } from "@/lib/extract-pdf";
-import { Separator } from "@/components/ui/separator";
-import { normalizePdfText } from "@/lib/normalize-pdf-text";
-import { Dispatch, SetStateAction, useRef, useState } from "react";
-import { RiAttachmentLine, RiCloseLine, RiLoader3Line } from "@remixicon/react";
-import { toast } from "sonner";
-import { ContractDataType } from "../../types";
 import { BondDataType } from "@/packages/bonds/types";
+import { Separator } from "@/components/ui/separator";
 import { string2Object } from "@/lib/string-to-object";
-import { addMonths } from "date-fns";
+import { normalizePdfText } from "@/lib/normalize-pdf-text";
 import { useGetBondsByWorkspace } from "@/packages/bonds/api";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
 import { estimateTokens, MAX_TOKENS } from "@/lib/token-counter";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { RiAttachmentLine, RiCloseLine, RiLoader3Line } from "@remixicon/react";
 
 interface QuoteAgentModalProps {
   open: boolean;
@@ -105,7 +105,7 @@ export const QuoteAgentModal = ({
       {
         onSuccess: (quoteResponse) => {
           const data = string2Object(quoteResponse, quoteType);
-
+          console.log(quoteResponse);
           setExternalQuoteType(quoteType);
           setContractData(data.contractData);
 

@@ -7,4 +7,5 @@ export type ContractDataType = {
   contractValue: number;
   contractStart: Date;
   contractEnd: Date;
+  agreement: string;
 };

@@ -67,6 +67,9 @@ const BidBondInfo = ({
           setBidBondData((p) => ({ ...p, insuredValue }))
         }
         setRate={(rate) => setBidBondData((p) => ({ ...p, rate }))}
+        setExpiryDate={(expiryDate) =>
+          setBidBondData((p) => ({ ...p, expiryDate }))
+        }
       />
       <ResultsCard
         readOnly={editMode !== undefined && !editMode}

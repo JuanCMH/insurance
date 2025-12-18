@@ -64,6 +64,8 @@ export function DatePicker({
             mode="single"
             selected={date}
             onSelect={onSelect}
+            startMonth={new Date(1990, 0)}
+            endMonth={new Date(2070, 11)}
           />
         </PopoverContent>
       )}

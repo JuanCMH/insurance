@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Hint } from "./hint";
 import { formatCop } from "@/lib/format-cop";
+import { cn } from "@/lib/utils";
 
 interface CurrencyInputProps {
   value?: string;
@@ -60,7 +61,7 @@ export function CurrencyInput({
         value={display}
         onChange={handleChange}
         placeholder={placeholder}
-        className="w-full"
+        className={cn("w-full", readOnly && "cursor-default")}
         readOnly={readOnly}
         disabled={disabled}
       />

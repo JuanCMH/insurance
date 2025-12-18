@@ -7,13 +7,19 @@ import { ContractDataType } from "../types";
 import { Dispatch, SetStateAction } from "react";
 import { isAfter, isBefore } from "date-fns";
 import { RiContractFill } from "@remixicon/react";
+import { Field } from "@/components/field";
 
 interface ContractInfoProps {
+  readOnly: boolean;
   contractData: ContractDataType;
   setContractData: Dispatch<SetStateAction<ContractDataType>>;
 }
 
-const ContractInfo = ({ contractData, setContractData }: ContractInfoProps) => {
+const ContractInfo = ({
+  readOnly,
+  contractData,
+  setContractData,
+}: ContractInfoProps) => {
   const handleStartDateChange = (date: Date) => {
     if (isAfter(date, contractData.contractEnd)) return;
     setContractData((prev) => ({ ...prev, contractStart: date }));
@@ -41,86 +47,73 @@ const ContractInfo = ({ contractData, setContractData }: ContractInfoProps) => {
       </div>
       <Separator className="my-2" />
       <div className="mt-2 grid grid-cols-4 gap-2">
-        <div className="grid w-full items-center gap-1 col-span-3">
-          <Label htmlFor="contractor" className="text-xs">
-            AFIANZADO/CONTRATISTA
-          </Label>
-          <Input
-            id="contractor"
-            placeholder="Luis Salamanca"
-            value={contractData.contractor}
-            onChange={(e) =>
-              setContractData((prev) => ({
-                ...prev,
-                contractor: e.target.value,
-              }))
-            }
-          />
-        </div>
-        <div className="grid w-full items-center gap-1">
-          <Label htmlFor="contractor-id" className="text-xs">
-            NIT
-          </Label>
-          <Input
-            id="contractor-id"
-            placeholder="9012345678"
-            value={contractData.contractorId}
-            onChange={(e) =>
-              setContractData((prev) => ({
-                ...prev,
-                contractorId: e.target.value,
-              }))
-            }
-          />
-        </div>
-        <div className="grid w-full items-center gap-1 col-span-3">
-          <Label htmlFor="contractee" className="text-xs">
-            ASEGURADO-BENEFICIARIO/CONTRATANTE
-          </Label>
-          <Input
-            id="contractee"
-            placeholder="Juan Pérez"
-            value={contractData.contractee}
-            onChange={(e) =>
-              setContractData((prev) => ({
-                ...prev,
-                contractee: e.target.value,
-              }))
-            }
-          />
-        </div>
-        <div className="grid w-full items-center gap-1">
-          <Label htmlFor="contractee-id" className="text-xs">
-            NIT
-          </Label>
-          <Input
-            id="contractee-id"
-            placeholder="8765432109"
-            value={contractData.contracteeId}
-            onChange={(e) =>
-              setContractData((prev) => ({
-                ...prev,
-                contracteeId: e.target.value,
-              }))
-            }
-          />
-        </div>
-        <div className="grid w-full items-center gap-1">
-          <Label htmlFor="contract-type" className="text-xs">
-            TIPO DE CONTRATO
-          </Label>
-          <Input
-            id="contract-type"
-            placeholder="Prestación de servicios"
-            value={contractData.contractType}
-            onChange={(e) =>
-              setContractData((prev) => ({
-                ...prev,
-                contractType: e.target.value,
-              }))
-            }
-          />
-        </div>
+        <Field
+          label="AFIANZADO/CONTRATISTA"
+          htmlFor="contractor"
+          placeholder="Luis Salamanca"
+          value={contractData.contractor}
+          onChange={(value) =>
+            setContractData((prev) => ({
+              ...prev,
+              contractor: value,
+            }))
+          }
+          className="col-span-3"
+          readOnly={readOnly}
+        />
+        <Field
+          label="IDENTIFICACIÓN"
+          htmlFor="contractor-id"
+          placeholder="9012345678"
+          value={contractData.contractorId}
+          onChange={(value) =>
+            setContractData((prev) => ({
+              ...prev,
+              contractorId: value,
+            }))
+          }
+          readOnly={readOnly}
+        />
+        <Field
+          label="ASEGURADO-BENEFICIARIO/CONTRATANTE"
+          htmlFor="contractee"
+          placeholder="Juan Pérez"
+          value={contractData.contractee}
+          onChange={(value) =>
+            setContractData((prev) => ({
+              ...prev,
+              contractee: value,
+            }))
+          }
+          className="col-span-3"
+          readOnly={readOnly}
+        />
+        <Field
+          label="IDENTIFICACIÓN"
+          htmlFor="contractee-id"
+          placeholder="8765432109"
+          value={contractData.contracteeId}
+          onChange={(value) =>
+            setContractData((prev) => ({
+              ...prev,
+              contracteeId: value,
+            }))
+          }
+          readOnly={readOnly}
+        />
+        <Field
+          label="TIPO DE CONTRATO"
+          htmlFor="contract-type"
+          placeholder="Prestación de servicios"
+          value={contractData.contractType}
+          onChange={(value) =>
+            setContractData((prev) => ({
+              ...prev,
+              contractType: value,
+            }))
+          }
+          readOnly={readOnly}
+        />
         <div className="grid w-full items-center gap-1">
           <Label htmlFor="contract-value" className="text-xs">
             VALOR DEL CONTRATO
@@ -133,6 +126,7 @@ const ContractInfo = ({ contractData, setContractData }: ContractInfoProps) => {
                 : ""
             }
             onChange={handleContractValueChange}
+            readOnly={readOnly}
           />
         </div>
         <div className="grid w-full items-center gap-1">
@@ -140,6 +134,7 @@ const ContractInfo = ({ contractData, setContractData }: ContractInfoProps) => {
             INICIO
           </Label>
           <DatePicker
+            readOnly={readOnly}
             date={contractData.contractStart}
             onSelect={(date) => date && handleStartDateChange(date)}
           />
@@ -149,6 +144,7 @@ const ContractInfo = ({ contractData, setContractData }: ContractInfoProps) => {
             FINALIZACIÓN
           </Label>
           <DatePicker
+            readOnly={readOnly}
             date={contractData.contractEnd}
             onSelect={(date) => date && handleEndDateChange(date)}
           />

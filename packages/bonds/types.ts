@@ -10,7 +10,7 @@ export type BondDataType = {
 };
 
 export type PerformanceBondDataType = {
-  id: Id<"bonds">;
+  id?: Id<"bonds">;
   name: string;
   startDate: Date;
   endDate: Date;

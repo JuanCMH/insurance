@@ -3,7 +3,6 @@
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -21,13 +20,13 @@ export const Hint = ({
   side = "top",
 }: HintProps) => {
   return (
-    <TooltipProvider>
-      <Tooltip delayDuration={50} open={label ? undefined : false}>
-        <TooltipTrigger asChild>{children}</TooltipTrigger>
+    <Tooltip delayDuration={50}>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      {label && (
         <TooltipContent align={align} side={side}>
           <p className="font-medium text-xs">{label}</p>
         </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+      )}
+    </Tooltip>
   );
 };

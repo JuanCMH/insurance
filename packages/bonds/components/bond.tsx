@@ -1,5 +1,6 @@
 import { CurrencyInput } from "@/components/currency-input";
 import { DatePicker } from "@/components/date-picker";
+import { Field } from "@/components/field";
 import { TaxPicker } from "@/components/tax-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ import {
 import { Dispatch, SetStateAction } from "react";
 
 interface BondProps {
+  readOnly?: boolean;
   contractData: ContractDataType;
   startDate: Date;
   endDate: Date;
@@ -41,6 +43,7 @@ const Bond = ({
   setPercentage,
   setInsuredValue,
   setRate,
+  readOnly = false,
 }: BondProps) => {
   const handleStartDateChange = (date: Date) => {
     if (isAfter(date, endDate)) return;
@@ -100,6 +103,7 @@ const Bond = ({
           DESDE
         </Label>
         <DatePicker
+          readOnly={readOnly}
           date={startDate}
           onSelect={(date) => date && handleStartDateChange(date)}
         />
@@ -109,77 +113,72 @@ const Bond = ({
           HASTA
         </Label>
         <DatePicker
+          readOnly={readOnly}
           date={endDate}
           onSelect={(date) => date && handleEndDateChange(date)}
         />
       </div>
-      <div className="grid w-full items-center gap-1">
-        <Label htmlFor="bond-days" className="text-xs">
-          DIAS
-        </Label>
-        <Input
-          type="number"
-          placeholder="365"
-          id="bond-days"
-          inputMode="numeric"
-          min={0}
-          step={1}
-          value={
-            differenceInCalendarDays(endDate, startDate) === 0
-              ? ""
-              : differenceInCalendarDays(endDate, startDate)
-          }
-          onChange={(e) => handleDaysChange(sanitizeInteger(e.target.value))}
-          onKeyDown={(e) => {
-            if (["-", "+", "e", "E", ","].includes(e.key)) e.preventDefault();
-          }}
-        />
-      </div>
-      <div className="grid w-full items-center gap-1">
-        <Label htmlFor="bond-months" className="text-xs">
-          MESES
-        </Label>
-        <Input
-          type="number"
-          placeholder="12"
-          id="bond-months"
-          inputMode="numeric"
-          min={0}
-          value={
-            differenceInCalendarMonths(endDate, startDate) === 0
-              ? ""
-              : differenceInCalendarMonths(endDate, startDate)
-          }
-          onChange={(e) => handleMonthsChange(sanitizeDecimal(e.target.value))}
-          onKeyDown={(e) => {
-            if (["-", "+", "e", "E", ","].includes(e.key)) e.preventDefault();
-          }}
-        />
-      </div>
-      <div className="grid w-full items-center gap-1">
-        <Label htmlFor="bond-percentage" className="text-xs">
-          PORCENTAJE %
-        </Label>
-        <Input
-          type="number"
-          id="bond-percentage"
-          placeholder="10"
-          inputMode="numeric"
-          min={0}
-          max={100}
-          disabled={contractData.contractValue === 0}
-          value={percentage === 0 ? "" : percentage}
-          onChange={(e) => handlePercentageChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (["-", "+", "e", "E", ","].includes(e.key)) e.preventDefault();
-          }}
-        />
-      </div>
+      <Field
+        min={0}
+        step={1}
+        label="DIAS"
+        type="number"
+        placeholder="365"
+        readOnly={readOnly}
+        htmlFor="bond-days"
+        inputMode="numeric"
+        value={
+          differenceInCalendarDays(endDate, startDate) === 0
+            ? ""
+            : differenceInCalendarDays(endDate, startDate)
+        }
+        onChange={(value) => handleDaysChange(sanitizeInteger(value))}
+        onKeyDown={(e) => {
+          if (["-", "+", "e", "E", ","].includes(e.key)) e.preventDefault();
+        }}
+      />
+      <Field
+        min={0}
+        step={1}
+        label="MESES"
+        type="number"
+        placeholder="12"
+        readOnly={readOnly}
+        htmlFor="bond-months"
+        inputMode="numeric"
+        value={
+          differenceInCalendarMonths(endDate, startDate) === 0
+            ? ""
+            : differenceInCalendarMonths(endDate, startDate)
+        }
+        onChange={(value) => handleMonthsChange(sanitizeDecimal(value))}
+        onKeyDown={(e) => {
+          if (["-", "+", "e", "E", ","].includes(e.key)) e.preventDefault();
+        }}
+      />
+      <Field
+        min={0}
+        max={100}
+        step={0.01}
+        label="PORCENTAJE %"
+        type="number"
+        placeholder="10"
+        readOnly={readOnly}
+        htmlFor="bond-percentage"
+        inputMode="numeric"
+        disabled={contractData.contractValue === 0}
+        value={percentage === 0 ? "" : percentage}
+        onChange={(value) => handlePercentageChange(value)}
+        onKeyDown={(e) => {
+          if (["-", "+", "e", "E", ","].includes(e.key)) e.preventDefault();
+        }}
+      />
       <div className="grid w-full items-center gap-1 col-span-2">
         <Label htmlFor="bond-insured-value" className="text-xs">
           VALOR ASEGURADO
         </Label>
         <CurrencyInput
+          readOnly={readOnly}
           placeholder="$20.000.000"
           disabled={contractData.contractValue === 0}
           value={insuredValue === 0 ? "" : String(insuredValue)}
@@ -192,9 +191,10 @@ const Bond = ({
         </Label>
         <TaxPicker
           placeholder="0"
-          disabled={contractData.contractValue === 0}
-          value={rate === 0 ? "" : String(rate)}
+          readOnly={readOnly}
           onChange={handleRateChange}
+          value={rate === 0 ? "" : String(rate)}
+          disabled={contractData.contractValue === 0}
         />
       </div>
     </div>

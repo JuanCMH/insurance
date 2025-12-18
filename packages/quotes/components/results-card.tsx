@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Dispatch, SetStateAction, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Dispatch, SetStateAction } from "react";
 import { CurrencyInput } from "@/components/currency-input";
 
 interface ResultsCardProps {
@@ -9,6 +9,7 @@ interface ResultsCardProps {
   total: number;
   premium: number;
   expenses?: number;
+  readOnly?: boolean;
   setExpenses?: Dispatch<SetStateAction<number>>;
   calculateExpensesTaxes?: boolean;
   setCalculateExpensesTaxes?: Dispatch<SetStateAction<boolean>>;
@@ -19,6 +20,7 @@ const ResultsCard = ({
   total,
   premium,
   expenses,
+  readOnly,
   setExpenses,
   calculateExpensesTaxes = false,
   setCalculateExpensesTaxes,
@@ -50,6 +52,7 @@ const ResultsCard = ({
             </Label>
             <CurrencyInput
               placeholder="$0"
+              readOnly={readOnly}
               value={expenses === 0 ? "" : expenses.toString()}
               onChange={(value) => setExpenses(Number(value))}
             />
@@ -91,7 +94,7 @@ const ResultsCard = ({
           <Switch
             id="bid-bond-calculate-taxes"
             checked={calculateExpensesTaxes}
-            onCheckedChange={setCalculateExpensesTaxes}
+            onCheckedChange={readOnly ? undefined : setCalculateExpensesTaxes}
           />
           <Label htmlFor="bid-bond-calculate-taxes" className="text-xs">
             Calcular IVA de los gastos

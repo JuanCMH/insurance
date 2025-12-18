@@ -11,6 +11,7 @@ interface TaxPickerProps {
   onChange?: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  readOnly?: boolean;
 }
 
 const toOptionValue = (num: number) => {
@@ -37,12 +38,16 @@ export function TaxPicker({
   onChange,
   placeholder,
   disabled,
+  readOnly,
 }: TaxPickerProps) {
+  const normalizedValue = normalizeValue(value);
+
   return (
     <Select
-      disabled={disabled}
+      key={normalizedValue}
+      disabled={disabled || readOnly}
       onValueChange={onChange}
-      value={normalizeValue(value)}
+      value={normalizedValue}
     >
       <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />

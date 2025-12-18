@@ -45,7 +45,7 @@ export const QuoteActions = ({ id, quote, children }: QuoteActionsProps) => {
   };
 
   const onOpenQuote = () => {
-    router.push(`workspaces/${quote.workspaceId}/quotes/${id}`);
+    router.push(`/workspaces/${quote.workspaceId}/quotes/${id}`);
   };
 
   return (

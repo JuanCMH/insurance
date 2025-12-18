@@ -8,13 +8,17 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useDates } from "@/lib/useDates";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useGetQuotesByWorkspace } from "@/packages/quotes/api";
 import { columns } from "@/packages/quotes/components/table/quote-column";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
 import { QuoteDataTable } from "@/packages/quotes/components/table/quote-data-table";
+import { RiAddCircleFill } from "@remixicon/react";
 
 const QuotePage = () => {
+  const router = useRouter();
   const workspaceId = useWorkspaceId();
 
   const [{ selectedYear, selectedMonth }, setDates] = useDates();
@@ -28,6 +32,10 @@ const QuotePage = () => {
   const handleMonthChange = (monthValue: string) => {
     const [year, month] = monthValue.split("-");
     setDates({ selectedYear: year, selectedMonth: month });
+  };
+
+  const onNewQuoteClick = () => {
+    router.push(`/workspaces/${workspaceId}/quotes/new`);
   };
 
   return (
@@ -45,6 +53,16 @@ const QuotePage = () => {
                     <BreadcrumbPage>Lista de Cotizaciones</BreadcrumbPage>
                   </BreadcrumbList>
                 </Breadcrumb>
+                <Button
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={onNewQuoteClick}
+                  className="cursor-pointer ml-auto"
+                >
+                  <RiAddCircleFill />
+                  Nueva Cotización
+                </Button>
               </div>
             </div>
           </header>

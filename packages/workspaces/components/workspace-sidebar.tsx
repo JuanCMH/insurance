@@ -5,6 +5,7 @@ import {
   RiGroup2Fill,
   RiFolderShield2Fill,
   RiMoneyDollarCircleFill,
+  RiAddCircleFill,
 } from "@remixicon/react";
 import {
   Sidebar,
@@ -45,7 +46,7 @@ export function WorkspaceSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         {
           title: "Crear Cotización",
           url: `/workspaces/${workspaceId}/quotes/new`,
-          icon: RiAddBoxFill,
+          icon: RiAddCircleFill,
         },
       ],
     },

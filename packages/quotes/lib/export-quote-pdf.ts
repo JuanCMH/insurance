@@ -11,19 +11,21 @@ import { TDocumentDefinitions } from "pdfmake/interfaces";
 pdfMake.vfs = pdfFonts.vfs || pdfFonts;
 
 interface GenerateQuotePDFParams {
+  expenses?: number;
+  workspaceName?: string;
   contractData: ContractDataType;
   bondsData: Array<BondDataType>;
-  expenses?: number;
   calculateExpensesTaxes?: boolean;
   quoteType: "bidBond" | "performanceBonds";
 }
 
 export const generateQuotePDF = async ({
-  contractData,
   bondsData,
-  expenses = 0,
-  calculateExpensesTaxes = false,
   quoteType,
+  contractData,
+  expenses = 0,
+  workspaceName,
+  calculateExpensesTaxes = false,
 }: GenerateQuotePDFParams) => {
   const totals = getQuoteTotals(
     bondsData.map((bond) => ({
@@ -42,10 +44,27 @@ export const generateQuotePDF = async ({
   const documentDefinition: TDocumentDefinitions = {
     pageOrientation: "landscape",
     content: [
-      {
-        text: `Cotización ${quoteType === "bidBond" ? "de Seriedad de la oferta" : "de Cumplimiento"}`,
-        style: "header",
-      },
+      workspaceName
+        ? {
+            columns: [
+              {
+                text: `Cotización ${quoteType === "bidBond" ? "de Seriedad de la oferta" : "de Cumplimiento"}`,
+                style: "header",
+                alignment: "left",
+                fontSize: 14,
+              },
+              {
+                text: workspaceName,
+                style: "header",
+                alignment: "right",
+                fontSize: 14,
+              },
+            ],
+          }
+        : {
+            text: `Cotización ${quoteType === "bidBond" ? "de Seriedad de la oferta" : "de Cumplimiento"}`,
+            style: "header",
+          },
       { text: "\n" },
       {
         columns: [

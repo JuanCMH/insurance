@@ -31,12 +31,16 @@ import { useGetQuoteById, useUpdateQuote } from "@/packages/quotes/api";
 import { generateQuotePDF } from "@/packages/quotes/lib/export-quote-pdf";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
+import { useGetWorkspace } from "@/packages/workspaces/api";
 
 const QuoteIdPage = () => {
   const router = useRouter();
   const quoteId = useQuoteId();
   const workspaceId = useWorkspaceId();
 
+  const { data: workspace, isLoading: isLoadingWorkspace } = useGetWorkspace({
+    id: workspaceId,
+  });
   const { mutate: updateQuote, isPending: isUpdatingQuote } = useUpdateQuote();
 
   const { data: quote, isLoading: isLoadingQuote } = useGetQuoteById({
@@ -265,8 +269,10 @@ const QuoteIdPage = () => {
                           ? [bidBondData]
                           : performanceBondsData,
                       quoteType: quote.quoteType,
+                      workspaceName: workspace?.name,
                     });
                   }}
+                  disabled={isLoadingWorkspace}
                 >
                   <RiDownloadLine />
                   Exportar PDF

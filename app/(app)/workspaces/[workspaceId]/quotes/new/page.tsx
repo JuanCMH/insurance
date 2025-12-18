@@ -229,15 +229,15 @@ const NewQuotePage = () => {
               <PerformanceBondsInfo
                 type="create"
                 expenses={expenses}
+                setExpenses={setExpenses}
                 contractData={contractData}
+                isLoading={isCreatingQuote}
+                setQuoteType={setQuoteType}
                 performanceBondsData={performanceBondsData}
                 calculateExpensesTaxes={calculateExpensesTaxes}
-                setExpenses={setExpenses}
                 setPerformanceBondsData={setPerformanceBondsData}
                 onSubmit={handleCreatePerformanceBondsQuote}
-                isLoading={isCreatingQuote}
                 setCalculateExpensesTaxes={setCalculateExpensesTaxes}
-                setQuoteType={setQuoteType}
               />
             </TabsContent>
           </Tabs>

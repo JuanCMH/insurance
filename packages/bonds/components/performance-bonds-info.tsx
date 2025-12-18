@@ -99,7 +99,6 @@ const PerformanceBondsInfo = ({
             onChange={setSelectedBondId}
             bonds={performanceBondsData}
             placeholder="Seleccionar amparo"
-            // disabled={!editMode && editMode !== undefined}
           />
           {(editMode || editMode === undefined) && (
             <DropdownMenu modal={false}>
@@ -133,7 +132,7 @@ const PerformanceBondsInfo = ({
         {selectedBond && (
           <>
             <Bond
-              readOnly={!editMode && editMode !== undefined}
+              readOnly={editMode !== undefined && !editMode}
               key={selectedBond.id}
               contractData={contractData}
               startDate={selectedBond.startDate}
@@ -178,7 +177,7 @@ const PerformanceBondsInfo = ({
               }}
             />
             <ResultsCard
-              readOnly={!editMode && editMode !== undefined}
+              readOnly={editMode !== undefined && !editMode}
               vat={performanceBondTotals.vat}
               total={performanceBondTotals.total}
               premium={performanceBondTotals.premium}
@@ -187,7 +186,7 @@ const PerformanceBondsInfo = ({
         )}
         {!selectedBond && (
           <ResultsCard
-            readOnly={!editMode && editMode !== undefined}
+            readOnly={editMode !== undefined && !editMode}
             vat={results.vat}
             total={results.total}
             premium={results.premium}

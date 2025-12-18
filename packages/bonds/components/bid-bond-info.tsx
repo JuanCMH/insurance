@@ -49,7 +49,7 @@ const BidBondInfo = ({
   return (
     <form onSubmit={onSubmit}>
       <Bond
-        readOnly={!editMode}
+        readOnly={editMode !== undefined && !editMode}
         contractData={contractData}
         startDate={bidBondData.startDate}
         endDate={bidBondData.endDate}
@@ -69,7 +69,7 @@ const BidBondInfo = ({
         setRate={(rate) => setBidBondData((p) => ({ ...p, rate }))}
       />
       <ResultsCard
-        readOnly={!editMode}
+        readOnly={editMode !== undefined && !editMode}
         expenses={expenses}
         setExpenses={setExpenses}
         vat={bidBondTotals.vat}

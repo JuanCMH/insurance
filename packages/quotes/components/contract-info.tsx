@@ -10,7 +10,7 @@ import { RiContractFill } from "@remixicon/react";
 import { Field } from "@/components/field";
 
 interface ContractInfoProps {
-  readOnly: boolean;
+  readOnly?: boolean;
   contractData: ContractDataType;
   setContractData: Dispatch<SetStateAction<ContractDataType>>;
 }

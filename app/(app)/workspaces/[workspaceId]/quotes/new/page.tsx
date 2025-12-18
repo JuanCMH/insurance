@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
+import { useCreateQuote } from "@/packages/quotes/api";
+import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,6 +24,10 @@ import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-
 import { QuoteAgentModal } from "@/packages/quotes/components/modals/quote-agent-modal";
 
 const NewQuotePage = () => {
+  const workspaceId = useWorkspaceId();
+  const { mutate: createQuote, isPending: isCreatingQuote } = useCreateQuote();
+  const [expenses, setExpenses] = useState(0);
+  const [calculateExpensesTaxes, setCalculateExpensesTaxes] = useState(false);
   const [agentModalOpen, setAgentModalOpen] = useState(false);
   const [quoteType, setQuoteType] = useState<"bidBond" | "performanceBonds">(
     "bidBond",
@@ -77,6 +84,89 @@ const NewQuotePage = () => {
     setPerformanceBondsData([]);
   };
 
+  const handleCreateBidQuote = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    createQuote(
+      {
+        workspaceId,
+        quoteType: "bidBond",
+        quoteBonds: [
+          {
+            name: bidBondData.name,
+            startDate: bidBondData.startDate.getTime(),
+            endDate: bidBondData.endDate.getTime(),
+            percentage: bidBondData.percentage,
+            insuredValue: bidBondData.insuredValue,
+            rate: bidBondData.rate,
+          },
+        ],
+        expenses,
+        calculateExpensesTaxes,
+        contractee: contractData.contractee,
+        contracteeId: contractData.contracteeId,
+        contractor: contractData.contractor,
+        contractorId: contractData.contractorId,
+        contractType: contractData.contractType,
+        contractValue: contractData.contractValue,
+        contractStart: contractData.contractStart.getTime(),
+        contractEnd: contractData.contractEnd.getTime(),
+      },
+      {
+        onSuccess: () => {
+          resetForm();
+          setExpenses(0);
+          setCalculateExpensesTaxes(false);
+          toast.success("Cotización creada exitosamente");
+        },
+        onError: () => {
+          toast.error("Error al crear la cotización");
+        },
+      },
+    );
+  };
+
+  const handleCreatePerformanceBondsQuote = (
+    e: React.FormEvent<HTMLFormElement>,
+  ) => {
+    e.preventDefault();
+    createQuote(
+      {
+        workspaceId,
+        quoteType: "performanceBonds",
+        quoteBonds: performanceBondsData.map((bond) => ({
+          name: bond.name,
+          startDate: bond.startDate.getTime(),
+          endDate: bond.endDate.getTime(),
+          percentage: bond.percentage,
+          insuredValue: bond.insuredValue,
+          rate: bond.rate,
+          bondId: bond.id,
+        })),
+        expenses,
+        calculateExpensesTaxes,
+        contractee: contractData.contractee,
+        contracteeId: contractData.contracteeId,
+        contractor: contractData.contractor,
+        contractorId: contractData.contractorId,
+        contractType: contractData.contractType,
+        contractValue: contractData.contractValue,
+        contractStart: contractData.contractStart.getTime(),
+        contractEnd: contractData.contractEnd.getTime(),
+      },
+      {
+        onSuccess: () => {
+          resetForm();
+          setExpenses(0);
+          setCalculateExpensesTaxes(false);
+          toast.success("Cotización creada exitosamente");
+        },
+        onError: () => {
+          toast.error("Error al crear la cotización");
+        },
+      },
+    );
+  };
+
   return (
     <>
       <div className="w-full h-full flex-1 flex flex-col p-2 pl-2 md:pl-0">
@@ -123,19 +213,31 @@ const NewQuotePage = () => {
             <Separator />
             <TabsContent value="bidBond">
               <BidBondInfo
-                resetForm={resetForm}
+                type="create"
+                expenses={expenses}
                 contractData={contractData}
                 bidBondData={bidBondData}
+                calculateExpensesTaxes={calculateExpensesTaxes}
+                setExpenses={setExpenses}
                 setBidBondData={setBidBondData}
+                onSubmit={handleCreateBidQuote}
+                isLoading={isCreatingQuote}
+                setCalculateExpensesTaxes={setCalculateExpensesTaxes}
               />
             </TabsContent>
             <TabsContent value="performanceBonds">
               <PerformanceBondsInfo
+                type="create"
+                expenses={expenses}
                 contractData={contractData}
                 performanceBondsData={performanceBondsData}
+                calculateExpensesTaxes={calculateExpensesTaxes}
+                setExpenses={setExpenses}
                 setPerformanceBondsData={setPerformanceBondsData}
+                onSubmit={handleCreatePerformanceBondsQuote}
+                isLoading={isCreatingQuote}
+                setCalculateExpensesTaxes={setCalculateExpensesTaxes}
                 setQuoteType={setQuoteType}
-                resetForm={resetForm}
               />
             </TabsContent>
           </Tabs>

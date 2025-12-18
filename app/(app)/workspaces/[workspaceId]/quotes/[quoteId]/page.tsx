@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import {
   RiEditFill,
@@ -27,6 +28,7 @@ import ContractInfo from "@/packages/quotes/components/contract-info";
 import { useGetQuoteById, useUpdateQuote } from "@/packages/quotes/api";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
 import { BondDataType, PerformanceBondDataType } from "@/packages/bonds/types";
+import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
 
 const QuoteIdPage = () => {
   const router = useRouter();
@@ -107,32 +109,85 @@ const QuoteIdPage = () => {
     }
   }, [quote]);
 
-  const resetForm = () => {
-    setContractData({
-      contractor: "",
-      contractorId: "",
-      contractee: "",
-      contracteeId: "",
-      contractType: "",
-      contractValue: 0,
-      contractStart: new Date(),
-      contractEnd: new Date(),
-    });
-    setBidBondData({
-      name: "Seriedad de la oferta",
-      startDate: new Date(),
-      endDate: new Date(),
-      percentage: 0,
-      insuredValue: 0,
-      rate: 0,
-    });
-    setPerformanceBondsData([]);
-  };
-
   const onBack = () => router.push(`/workspaces/${workspaceId}/quotes`);
 
   const handleUpdateBidQuote = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    updateQuote(
+      {
+        id: quoteId,
+        quoteType: "bidBond",
+        quoteBonds: [
+          {
+            name: bidBondData.name,
+            startDate: bidBondData.startDate.getTime(),
+            endDate: bidBondData.endDate.getTime(),
+            percentage: bidBondData.percentage,
+            insuredValue: bidBondData.insuredValue,
+            rate: bidBondData.rate,
+          },
+        ],
+        expenses,
+        calculateExpensesTaxes,
+        contractee: contractData.contractee,
+        contracteeId: contractData.contracteeId,
+        contractor: contractData.contractor,
+        contractorId: contractData.contractorId,
+        contractType: contractData.contractType,
+        contractValue: contractData.contractValue,
+        contractStart: contractData.contractStart.getTime(),
+        contractEnd: contractData.contractEnd.getTime(),
+      },
+      {
+        onSuccess: () => {
+          setEditMode(false);
+          toast.success("Cotización actualizada exitosamente");
+        },
+        onError: () => {
+          toast.error("Error al actualizar la cotización");
+        },
+      },
+    );
+  };
+
+  const handleUpdatePerformanceBondsQuote = (
+    e: React.FormEvent<HTMLFormElement>,
+  ) => {
+    e.preventDefault();
+    updateQuote(
+      {
+        id: quoteId,
+        quoteType: "performanceBonds",
+        quoteBonds: performanceBondsData.map((bond) => ({
+          name: bond.name,
+          startDate: bond.startDate.getTime(),
+          endDate: bond.endDate.getTime(),
+          percentage: bond.percentage,
+          insuredValue: bond.insuredValue,
+          rate: bond.rate,
+          bondId: bond.id,
+        })),
+        expenses,
+        calculateExpensesTaxes,
+        contractee: contractData.contractee,
+        contracteeId: contractData.contracteeId,
+        contractor: contractData.contractor,
+        contractorId: contractData.contractorId,
+        contractType: contractData.contractType,
+        contractValue: contractData.contractValue,
+        contractStart: contractData.contractStart.getTime(),
+        contractEnd: contractData.contractEnd.getTime(),
+      },
+      {
+        onSuccess: () => {
+          setEditMode(false);
+          toast.success("Cotización actualizada exitosamente");
+        },
+        onError: () => {
+          toast.error("Error al actualizar la cotización");
+        },
+      },
+    );
   };
 
   return (
@@ -213,13 +268,20 @@ const QuoteIdPage = () => {
                 />
               </TabsContent>
               <TabsContent value="performanceBonds">
-                {/* <PerformanceBondsInfo
+                <PerformanceBondsInfo
+                  type="update"
+                  editMode={editMode}
+                  expenses={expenses}
                   contractData={contractData}
                   performanceBondsData={performanceBondsData}
+                  calculateExpensesTaxes={calculateExpensesTaxes}
+                  setExpenses={setExpenses}
                   setPerformanceBondsData={setPerformanceBondsData}
-                  setQuoteType={setQuoteType}
-                  resetForm={resetForm}
-                /> */}
+                  onSubmit={handleUpdatePerformanceBondsQuote}
+                  isLoading={isUpdatingQuote}
+                  setCalculateExpensesTaxes={setCalculateExpensesTaxes}
+                  setQuoteType={() => {}}
+                />
               </TabsContent>
             </Tabs>
           </div>

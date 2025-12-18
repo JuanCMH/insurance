@@ -1,3 +1,5 @@
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 import {
   Select,
   SelectContent,
@@ -45,20 +47,31 @@ export function TaxPicker({
   return (
     <Select
       key={normalizedValue}
-      disabled={disabled || readOnly}
+      disabled={disabled}
       onValueChange={onChange}
       value={normalizedValue}
     >
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent className="flex max-h-48">
-        {rateOptions.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
+      {readOnly && (
+        <Input
+          readOnly
+          value={`${normalizedValue}%`}
+          className="cursor-default"
+        />
+      )}
+      {!readOnly && (
+        <>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent className="flex max-h-48">
+            {rateOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </>
+      )}
     </Select>
   );
 }

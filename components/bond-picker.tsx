@@ -33,19 +33,29 @@ export function BondPicker({
   return (
     <Select
       disabled={disabled}
-      onValueChange={onValueChange}
       value={value || "total"}
+      onValueChange={onValueChange}
     >
       <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="flex max-h-48">
-        <SelectItem value="total">Total</SelectItem>
-        {bonds?.map((bond) => (
-          <SelectItem key={bond.id} value={bond.id}>
-            {bond.name}
-          </SelectItem>
-        ))}
+        <SelectItem value="total" className="cursor-pointer">
+          Total
+        </SelectItem>
+        {bonds?.map((bond) => {
+          if (bond.id) {
+            return (
+              <SelectItem
+                key={bond.id}
+                value={bond.id}
+                className="cursor-pointer"
+              >
+                {bond.name}
+              </SelectItem>
+            );
+          }
+        })}
       </SelectContent>
     </Select>
   );

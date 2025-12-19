@@ -1,11 +1,9 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
-import { RandomReader, generateRandomString } from "@oslojs/crypto/random";
-import { api } from "./_generated/api";
-import { Doc } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
-import { workspacesErrors } from "./lib/error_messages";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { checkPermission, populateMember } from "./roles";
+import { RandomReader, generateRandomString } from "@oslojs/crypto/random";
+import { workspaceErrors } from "./errors/workspace";
 
 const random: RandomReader = {
   read(bytes) {
@@ -21,40 +19,24 @@ export const join = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(workspaceErrors.unauthorized);
 
     const workspace = await ctx.db
       .query("workspaces")
       .withIndex("joinCode", (q) => q.eq("joinCode", args.joinCode))
       .unique();
-    if (!workspace) return null;
+    if (!workspace) throw new ConvexError(workspaceErrors.joinCodeInvalid);
 
     const member = await populateMember(ctx, userId, workspace._id);
-    if (member)
-      return {
-        workspaceId: workspace._id,
-      };
+    if (member) throw new ConvexError(workspaceErrors.alreadyMember);
 
-    // await ctx.db.insert("members", {
-    //   userId,
-    //   workspaceId: workspace._id,
-    //   role: "member",
-    // });
-
-    const currentUser = await ctx.db.get(userId);
-    const userName = currentUser?.name || "Usuario desconocido";
-    // await ctx.runMutation(api.logs.create, {
-    //   description: `Usuario se unió al workspace: ${workspace.name}`,
-    //   userName,
-    //   type: "info",
-    //   workspaceId: workspace._id,
-    //   affectedEntityType: "workspace",
-    //   affectedEntityId: workspace._id,
-    // });
-
-    return {
+    await ctx.db.insert("members", {
+      userId,
       workspaceId: workspace._id,
-    };
+      role: "member",
+    });
+
+    return workspace._id;
   },
 });
 
@@ -64,7 +46,7 @@ export const newJoinCode = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(workspaceErrors.unauthorized);
 
     const hasPermission = await checkPermission({
       ctx,
@@ -72,24 +54,13 @@ export const newJoinCode = mutation({
       permission: "inviteUsers",
       workspaceId: args.id,
     });
-    if (!hasPermission) return null;
+    if (!hasPermission) throw new ConvexError(workspaceErrors.permissionDenied);
 
     const workspace = await ctx.db.get(args.id);
-    if (!workspace) return null;
+    if (!workspace) throw new ConvexError(workspaceErrors.notFound);
 
     const joinCode = generateCode();
     await ctx.db.patch(args.id, { joinCode });
-
-    const currentUser = await ctx.db.get(userId);
-    const userName = currentUser?.name || "Usuario desconocido";
-    await ctx.runMutation(api.logs.create, {
-      description: `Código de unión actualizado para el espacio`,
-      userName,
-      type: "update",
-      workspaceId: args.id,
-      affectedEntityType: "workspace",
-      affectedEntityId: args.id,
-    });
 
     return args.id;
   },
@@ -101,10 +72,10 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(workspaceErrors.unauthorized);
 
     const user = await ctx.db.get(userId);
-    if (!user) return null;
+    if (!user) throw new ConvexError(workspaceErrors.userNotFound);
 
     const ownedWorkspaces = await ctx.db
       .query("workspaces")
@@ -113,7 +84,7 @@ export const create = mutation({
 
     const maxWorkspaces = 2;
     if (ownedWorkspaces.length >= maxWorkspaces) {
-      return null;
+      throw new ConvexError(workspaceErrors.limitReached);
     }
     const joinCode = generateCode();
     const workspaceId = await ctx.db.insert("workspaces", {
@@ -129,16 +100,6 @@ export const create = mutation({
       role: "admin",
     });
 
-    const currentUser = await ctx.db.get(userId);
-    const userName = currentUser?.name || "Usuario desconocido";
-    await ctx.runMutation(api.logs.create, {
-      description: `Espacio creado: ${args.name}`,
-      userName,
-      type: "create",
-      affectedEntityType: "workspace",
-      affectedEntityId: workspaceId,
-    });
-
     return workspaceId;
   },
 });
@@ -147,7 +108,7 @@ export const get = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) return [];
 
     const members = await ctx.db
       .query("members")
@@ -214,7 +175,7 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(workspaceErrors.unauthorized);
 
     const hasPermission = await checkPermission({
       ctx,
@@ -222,32 +183,12 @@ export const update = mutation({
       permission: "editWorkspace",
       workspaceId: args.id,
     });
-    if (!hasPermission) return null;
+    if (!hasPermission) throw new ConvexError(workspaceErrors.permissionDenied);
 
     const workspace = await ctx.db.get(args.id);
-    if (!workspace) return null;
+    if (!workspace) throw new ConvexError(workspaceErrors.notFound);
 
     await ctx.db.patch(args.id, { name: args.name, active: args.active });
-
-    const currentUser = await ctx.db.get(userId);
-    const userName = currentUser?.name || "Usuario desconocido";
-
-    const activeChanged = args.active !== workspace.active;
-
-    let description = `Espacio actualizado: ${args.name}`;
-    if (activeChanged) {
-      const newActiveState = args.active ? "activado" : "desactivado";
-      description = `Espacio ${newActiveState}: ${args.name}`;
-    }
-
-    await ctx.runMutation(api.logs.create, {
-      description,
-      userName,
-      type: "update",
-      workspaceId: args.id,
-      affectedEntityType: "workspace",
-      affectedEntityId: args.id,
-    });
 
     return args.id;
   },
@@ -259,17 +200,17 @@ export const remove = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(workspaceErrors.unauthorized);
 
     const hasPermission = await checkPermission({
       ctx,
       userId,
       workspaceId: args.id,
     });
-    if (!hasPermission) return null;
+    if (!hasPermission) throw new ConvexError(workspaceErrors.permissionDenied);
 
     const workspace = await ctx.db.get(args.id);
-    if (!workspace) return null;
+    if (!workspace) throw new ConvexError(workspaceErrors.notFound);
 
     const [members] = await Promise.all([
       ctx.db
@@ -284,16 +225,6 @@ export const remove = mutation({
 
     await ctx.db.delete(args.id);
 
-    const currentUser = await ctx.db.get(userId);
-    const userName = currentUser?.name || "Usuario desconocido";
-    await ctx.runMutation(api.logs.create, {
-      description: `Espacio eliminado: ${workspace.name}`,
-      userName,
-      type: "delete",
-      affectedEntityType: "workspace",
-      affectedEntityId: args.id,
-    });
-
     return args.id;
   },
 });
@@ -301,7 +232,7 @@ export const remove = mutation({
 export const getByUserId = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return workspacesErrors.userNotAuthenticated;
+    if (userId === null) return [];
 
     const members = await ctx.db
       .query("members")

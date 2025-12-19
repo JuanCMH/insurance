@@ -30,11 +30,17 @@ export function ProfileModal({ open, setOpen, user }: ProfileModalProps) {
 
   const [userName, setUserName] = useState<string>(user.name || "");
 
-  const { mutate: updateUserName, isPending: isUpdatingUserName } =
-    useUpdateUserName();
+  const {
+    mutate: updateUserName,
+    isPending: isUpdatingUserName,
+    errorMessage: updateNameErrorMessage,
+  } = useUpdateUserName();
 
-  const { mutate: updateUserImage, isPending: isUpdatingUserImage } =
-    useUpdateUserImage();
+  const {
+    mutate: updateUserImage,
+    isPending: isUpdatingUserImage,
+    errorMessage: updateImageErrorMessage,
+  } = useUpdateUserImage();
 
   const { mutate: generateUploadUrl, isPending: isGeneratingUploadUrl } =
     useGenerateUploadUrl();
@@ -57,7 +63,7 @@ export function ProfileModal({ open, setOpen, user }: ProfileModalProps) {
           setEditNameOpen(false);
         },
         onError() {
-          toast.error("Error al actualizar el nombre de usuario");
+          toast.error(updateNameErrorMessage);
         },
       },
     );
@@ -95,7 +101,7 @@ export function ProfileModal({ open, setOpen, user }: ProfileModalProps) {
           toast.success("Imagen de usuario actualizada correctamente");
         },
         onError() {
-          toast.error("Error al actualizar la imagen de usuario");
+          toast.error(updateImageErrorMessage);
         },
       },
     );

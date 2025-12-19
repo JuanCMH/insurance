@@ -1,7 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { usersErrors } from "./lib/error_messages";
+import { userErrors } from "./errors/users";
 
 export const updateImage = mutation({
   args: {
@@ -9,10 +9,10 @@ export const updateImage = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(userErrors.unauthorized);
 
     const user = await ctx.db.get(userId);
-    if (!user) return null;
+    if (!user) throw new ConvexError(userErrors.notFound);
 
     const oldImageId = user.mainImage;
 
@@ -32,10 +32,10 @@ export const updateName = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(userErrors.unauthorized);
 
     const user = await ctx.db.get(userId);
-    if (!user) return null;
+    if (!user) throw new ConvexError(userErrors.notFound);
 
     await ctx.db.patch(userId, {
       name: args.name,

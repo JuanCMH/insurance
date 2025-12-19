@@ -1,7 +1,8 @@
-import { authTables } from "@convex-dev/auth/server";
-import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 import { permissionsSchema } from "./lib/permissions";
+import { defineSchema, defineTable } from "convex/server";
+import { customColors } from "./lib/colors";
 
 const schema = defineSchema({
   ...authTables,
@@ -36,9 +37,12 @@ const schema = defineSchema({
     .index("userId", ["userId"]),
   workspaces: defineTable({
     name: v.string(),
-    userId: v.id("users"),
     joinCode: v.string(),
+    userId: v.id("users"),
     active: v.optional(v.boolean()),
+    logo: v.optional(v.id("_storage")),
+    primaryColor: v.optional(v.union(...customColors)),
+    secondaryColor: v.optional(v.union(...customColors)),
   })
     .index("userId", ["userId"])
     .index("joinCode", ["joinCode"]),

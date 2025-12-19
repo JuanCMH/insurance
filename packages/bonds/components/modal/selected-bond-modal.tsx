@@ -51,8 +51,16 @@ export const SelectedBondModal = ({
     type: "critical",
   });
 
-  const { mutate: updateBond, isPending: isUpdatingBond } = useUpdateBond();
-  const { mutate: removeBond, isPending: isRemovingBond } = useRemoveBond();
+  const {
+    mutate: updateBond,
+    isPending: isUpdatingBond,
+    errorMessage: updateErrorMessage,
+  } = useUpdateBond();
+  const {
+    mutate: removeBond,
+    isPending: isRemovingBond,
+    errorMessage: removeErrorMessage,
+  } = useRemoveBond();
 
   const handleUpdateBond = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,7 +73,7 @@ export const SelectedBondModal = ({
           handleClose();
         },
         onError: () => {
-          toast.error("Error al actualizar el amparo");
+          toast.error(updateErrorMessage);
         },
       },
     );
@@ -84,7 +92,7 @@ export const SelectedBondModal = ({
           handleClose();
         },
         onError: () => {
-          toast.error("Error al eliminar el amparo");
+          toast.error(removeErrorMessage);
         },
       },
     );
@@ -114,7 +122,7 @@ export const SelectedBondModal = ({
                   required
                   id="bond-name"
                   minLength={4}
-                  maxLength={40}
+                  maxLength={70}
                   value={updateData.name}
                   disabled={isUpdatingBond}
                   placeholder="Amparo de cumplimiento"
@@ -128,7 +136,7 @@ export const SelectedBondModal = ({
                   DESCRIPCIÓN
                 </Label>
                 <Textarea
-                  maxLength={200}
+                  maxLength={300}
                   value={updateData.description}
                   disabled={isUpdatingBond}
                   className="resize-none h-24"

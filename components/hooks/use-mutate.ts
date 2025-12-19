@@ -1,6 +1,7 @@
 import { useMutation } from "convex/react";
 import { FunctionReference } from "convex/server";
 import { useCallback, useMemo, useState } from "react";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 type Options<ResponseType> = {
   onSuccess?: (data: ResponseType) => void;
@@ -16,6 +17,7 @@ export const useMutate = <T extends FunctionReference<"mutation">>(
 ) => {
   const [data, setData] = useState<T["_returnType"] | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>(null);
 
   const isPending = useMemo(() => status === "pending", [status]);
@@ -30,6 +32,7 @@ export const useMutate = <T extends FunctionReference<"mutation">>(
       try {
         setData(null);
         setError(null);
+        setErrorMessage(null);
         setStatus("pending");
 
         const response = await mutation(values);
@@ -38,6 +41,9 @@ export const useMutate = <T extends FunctionReference<"mutation">>(
         return response;
       } catch (err) {
         setStatus("error");
+        const msg = getErrorMessage(err);
+        setErrorMessage(msg);
+        setError(err as Error);
         options?.onError?.(err as Error);
         if (options?.throwError) throw err;
       } finally {
@@ -48,5 +54,14 @@ export const useMutate = <T extends FunctionReference<"mutation">>(
     [mutation],
   );
 
-  return { mutate, data, error, isPending, isSuccess, isError, isSettled };
+  return {
+    mutate,
+    data,
+    error,
+    errorMessage,
+    isPending,
+    isSuccess,
+    isError,
+    isSettled,
+  };
 };

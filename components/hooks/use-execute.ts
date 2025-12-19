@@ -1,6 +1,7 @@
 import { useAction } from "convex/react";
 import { FunctionReference } from "convex/server";
 import { useCallback, useMemo, useState } from "react";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 type Options<ResponseType> = {
   onSuccess?: (data: ResponseType) => void;
@@ -16,6 +17,7 @@ export const useExecute = <T extends FunctionReference<"action">>(
 ) => {
   const [data, setData] = useState<T["_returnType"] | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>(null);
 
   const isPending = useMemo(() => status === "pending", [status]);
@@ -30,6 +32,7 @@ export const useExecute = <T extends FunctionReference<"action">>(
       try {
         setData(null);
         setError(null);
+        setErrorMessage(null);
         setStatus("pending");
 
         const response = await action(args);
@@ -39,6 +42,8 @@ export const useExecute = <T extends FunctionReference<"action">>(
 
         return response;
       } catch (err) {
+        const msg = getErrorMessage(err);
+        setErrorMessage(msg);
         setError(err as Error);
         setStatus("error");
         options?.onError?.(err as Error);
@@ -55,6 +60,7 @@ export const useExecute = <T extends FunctionReference<"action">>(
     execute,
     data,
     error,
+    errorMessage,
     isPending,
     isSuccess,
     isError,

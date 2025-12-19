@@ -33,7 +33,11 @@ export const CreateBondModal = ({
 }: CreateBondModalProps) => {
   const workspaceId = useWorkspaceId();
 
-  const { mutate: createBond, isPending: isCreatingBond } = useCreateBond();
+  const {
+    mutate: createBond,
+    isPending: isCreatingBond,
+    errorMessage,
+  } = useCreateBond();
 
   const [createData, setCreateData] = useState<BondFormData>({
     name: "",
@@ -59,7 +63,7 @@ export const CreateBondModal = ({
           handleClose();
         },
         onError: () => {
-          toast.error("Error al crear el amparo");
+          toast.error(errorMessage);
         },
       },
     );
@@ -86,7 +90,7 @@ export const CreateBondModal = ({
                 required
                 id="bond-name"
                 minLength={4}
-                maxLength={40}
+                maxLength={70}
                 value={createData.name}
                 disabled={isCreatingBond}
                 placeholder="Amparo de cumplimiento"
@@ -100,7 +104,7 @@ export const CreateBondModal = ({
                 DESCRIPCIÓN
               </Label>
               <Textarea
-                maxLength={200}
+                maxLength={300}
                 value={createData.description}
                 disabled={isCreatingBond}
                 className="resize-none h-24"

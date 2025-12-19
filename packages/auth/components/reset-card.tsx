@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { calculatePasswordStrength } from "../lib/password-strength";
 import type { SignInFlow } from "../types";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 interface ResetCardProps {
   setState: (state: SignInFlow) => void;
@@ -36,8 +37,8 @@ export const ResetCard = ({ setState }: ResetCardProps) => {
         toast.success("Código de verificación enviado");
         setStep("code");
       })
-      .catch(() => {
-        toast.error("Correo no valido");
+      .catch((err) => {
+        toast.error(getErrorMessage(err));
       })
       .finally(() => {
         setPending(false);
@@ -55,7 +56,7 @@ export const ResetCard = ({ setState }: ResetCardProps) => {
     }
     setPending(true);
     signIn("password", { email, newPassword, code, flow: "reset-verification" })
-      .catch(() => toast.error("Correo o contraseña incorrectos"))
+      .catch((err) => toast.error(getErrorMessage(err)))
       .finally(() => setPending(false));
   };
 

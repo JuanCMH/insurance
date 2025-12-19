@@ -1,10 +1,9 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
-import { api } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { mutation, query, QueryCtx } from "./_generated/server";
-import { rolesErrors } from "./lib/error_messages";
 import { permissionsSchema } from "./lib/permissions";
+import { roleErrors } from "./errors/roles";
 
 const populateCustomRole = (ctx: QueryCtx, id: Id<"roles">) => ctx.db.get(id);
 
@@ -52,11 +51,10 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null)
-      throw new ConvexError(rolesErrors.userNotAuthenticated);
+    if (userId === null) throw new ConvexError(roleErrors.unauthorized);
 
     const role = await ctx.db.get(args.id);
-    if (!role) throw new ConvexError(rolesErrors.roleNotFound);
+    if (!role) throw new ConvexError(roleErrors.notFound);
 
     const hasPermission = await checkPermission({
       ctx,
@@ -64,28 +62,12 @@ export const update = mutation({
       permission: "editRoles",
       workspaceId: role.workspaceId,
     });
-    if (!hasPermission) throw new ConvexError(rolesErrors.cannotEditRoles);
+    if (!hasPermission) throw new ConvexError(roleErrors.cannotEditRoles);
 
     const { id, name, ...permissions } = args;
     await ctx.db.patch(args.id, {
       name: args.name,
       ...permissions,
-    });
-
-    const user = await ctx.db.get(userId);
-    const userName = user?.name || "Usuario desconocido";
-
-    const permissionsCount = Object.entries(permissions).filter(
-      ([_, value]) => value === true,
-    ).length;
-
-    await ctx.runMutation(api.logs.create, {
-      description: `Rol actualizado: ${role.name} (${permissionsCount} permisos)`,
-      userName,
-      type: "update",
-      workspaceId: role.workspaceId,
-      affectedEntityType: "role",
-      affectedEntityId: args.id,
     });
 
     return args.id;
@@ -98,11 +80,10 @@ export const remove = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null)
-      throw new ConvexError(rolesErrors.userNotAuthenticated);
+    if (userId === null) throw new ConvexError(roleErrors.unauthorized);
 
     const role = await ctx.db.get(args.id);
-    if (!role) throw new ConvexError(rolesErrors.roleNotFound);
+    if (!role) throw new ConvexError(roleErrors.notFound);
 
     const hasPermission = await checkPermission({
       ctx,
@@ -110,7 +91,7 @@ export const remove = mutation({
       permission: "deleteRoles",
       workspaceId: role.workspaceId,
     });
-    if (!hasPermission) throw new ConvexError(rolesErrors.cannotDeleteRoles);
+    if (!hasPermission) throw new ConvexError(roleErrors.cannotDeleteRoles);
 
     const membersWithRole = await ctx.db
       .query("members")
@@ -125,17 +106,6 @@ export const remove = mutation({
 
     await ctx.db.delete(args.id);
 
-    const user = await ctx.db.get(userId);
-    const userName = user?.name || "Usuario desconocido";
-    await ctx.runMutation(api.logs.create, {
-      description: `Rol eliminado: ${role.name}`,
-      userName,
-      type: "delete",
-      workspaceId: role.workspaceId,
-      affectedEntityType: "role",
-      affectedEntityId: args.id,
-    });
-
     return args.id;
   },
 });
@@ -148,8 +118,7 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null)
-      throw new ConvexError(rolesErrors.userNotAuthenticated);
+    if (userId === null) throw new ConvexError(roleErrors.unauthorized);
 
     const hasPermission = await checkPermission({
       ctx,
@@ -157,27 +126,10 @@ export const create = mutation({
       permission: "createRoles",
       workspaceId: args.workspaceId,
     });
-    if (!hasPermission) throw new ConvexError(rolesErrors.cannotCreateRoles);
+    if (!hasPermission) throw new ConvexError(roleErrors.cannotCreateRoles);
 
     const role = await ctx.db.insert("roles", {
       ...args,
-    });
-
-    const user = await ctx.db.get(userId);
-    const userName = user?.name || "Usuario desconocido";
-
-    const permissionsCount = Object.entries(args).filter(
-      ([key, value]) =>
-        key !== "name" && key !== "workspaceId" && value === true,
-    ).length;
-
-    await ctx.runMutation(api.logs.create, {
-      description: `Rol creado: ${args.name} (${permissionsCount} permisos)`,
-      userName,
-      type: "create",
-      workspaceId: args.workspaceId,
-      affectedEntityType: "role",
-      affectedEntityId: role,
     });
 
     return role;
@@ -211,7 +163,7 @@ export const get = query({
     if (userId === null) return [];
 
     const member = await populateMember(ctx, userId, args.workspaceId);
-    if (!member) return null;
+    if (!member) return [];
 
     const roles = await ctx.db
       .query("roles")

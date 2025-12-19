@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useCreateQuote } from "@/packages/quotes/api";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { getErrorMessage } from "@/lib/get-error-message";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,15 +18,29 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ContractDataType } from "@/packages/quotes/types";
 import BidBondInfo from "@/packages/bonds/components/bid-bond-info";
-import { RiAiGenerate2, RiShieldCheckFill } from "@remixicon/react";
+import {
+  RiAiGenerate2,
+  RiDownloadLine,
+  RiShieldCheckFill,
+} from "@remixicon/react";
 import ContractInfo from "@/packages/quotes/components/contract-info";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
 import { QuoteAgentModal } from "@/packages/quotes/components/modals/quote-agent-modal";
+import { generateQuotePDF } from "@/packages/quotes/lib/export-quote-pdf";
+import { useGetWorkspace } from "@/packages/workspaces/api";
 
 const NewQuotePage = () => {
   const workspaceId = useWorkspaceId();
-  const { mutate: createQuote, isPending: isCreatingQuote } = useCreateQuote();
+
+  const { data: workspace, isLoading: isLoadingWorkspace } = useGetWorkspace({
+    id: workspaceId,
+  });
+  const {
+    mutate: createQuote,
+    isPending: isCreatingQuote,
+    errorMessage,
+  } = useCreateQuote();
   const [expenses, setExpenses] = useState(0);
   const [calculateExpensesTaxes, setCalculateExpensesTaxes] = useState(false);
   const [agentModalOpen, setAgentModalOpen] = useState(false);
@@ -143,8 +158,8 @@ const NewQuotePage = () => {
           setCalculateExpensesTaxes(false);
           toast.success("Cotización creada exitosamente");
         },
-        onError: () => {
-          toast.error("Error al crear la cotización");
+        onError: (error) => {
+          toast.error(getErrorMessage(error));
         },
       },
     );
@@ -206,8 +221,8 @@ const NewQuotePage = () => {
           setCalculateExpensesTaxes(false);
           toast.success("Cotización creada exitosamente");
         },
-        onError: () => {
-          toast.error("Error al crear la cotización");
+        onError: (error) => {
+          toast.error(getErrorMessage(error));
         },
       },
     );
@@ -249,12 +264,33 @@ const NewQuotePage = () => {
             <header className="flex items-center justify-between gap-2">
               <div className="flex gap-2 items-center">
                 <RiShieldCheckFill className="size-4" />
-                <h1 className="text-lg font-semibold">Amparos</h1>
+                <TabsList className="h-8">
+                  <TabsTrigger value="bidBond">Seriedad</TabsTrigger>
+                  <TabsTrigger value="performanceBonds">
+                    Cumplimiento
+                  </TabsTrigger>
+                </TabsList>
               </div>
-              <TabsList className="h-8">
-                <TabsTrigger value="bidBond">Seriedad</TabsTrigger>
-                <TabsTrigger value="performanceBonds">Cumplimiento</TabsTrigger>
-              </TabsList>
+              <Button
+                size="sm"
+                onClick={() => {
+                  generateQuotePDF({
+                    expenses,
+                    contractData,
+                    calculateExpensesTaxes,
+                    bondsData:
+                      quoteType === "bidBond"
+                        ? [bidBondData]
+                        : performanceBondsData,
+                    quoteType: quoteType,
+                    workspaceName: workspace?.name,
+                  });
+                }}
+                disabled={isLoadingWorkspace}
+              >
+                <RiDownloadLine />
+                Exportar PDF
+              </Button>
             </header>
             <Separator />
             <TabsContent value="bidBond">

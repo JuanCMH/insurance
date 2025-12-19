@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/input-otp";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { handleConvexErrorCallback } from "@/lib/convex-error-handler";
 import { useCurrentUser } from "@/packages/auth/api";
 import { RiLock2Line } from "@remixicon/react";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
@@ -38,8 +37,16 @@ export const CreateWorkspaceModal = () => {
 
   const { data: user, isLoading: isLoadingUser } = useCurrentUser();
 
-  const { mutate: joinMutate, isPending: isJoinPending } = useJoinWorkspace();
-  const { mutate: createMutate, isPending: isCreating } = useCreateWorkspace();
+  const {
+    mutate: joinMutate,
+    isPending: isJoinPending,
+    errorMessage: joinErrorMessage,
+  } = useJoinWorkspace();
+  const {
+    mutate: createMutate,
+    isPending: isCreating,
+    errorMessage: createErrorMessage,
+  } = useCreateWorkspace();
 
   const { data: ownedWorkspaces, isLoading: isLoadingWorkspaces } =
     useGetOwnedWorkspaces();
@@ -73,7 +80,9 @@ export const CreateWorkspaceModal = () => {
           router.push(`workspaces/${workspaceId}`);
           handleClose();
         },
-        onError: (error) => handleConvexErrorCallback(error),
+        onError: () => {
+          toast.error(createErrorMessage);
+        },
       },
     );
   };
@@ -83,12 +92,14 @@ export const CreateWorkspaceModal = () => {
     joinMutate(
       { joinCode },
       {
-        onSuccess({ workspaceId }) {
+        onSuccess(workspaceId) {
           toast.success("Te has unido correctamente al espacio");
           router.push(`workspaces/${workspaceId}`);
           handleClose();
         },
-        onError: (error) => handleConvexErrorCallback(error),
+        onError: () => {
+          toast.error(joinErrorMessage);
+        },
       },
     );
   };

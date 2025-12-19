@@ -54,7 +54,11 @@ export const QuoteAgentModal = ({
   const workspaceId = useWorkspaceId();
   const fileElementRef = useRef<HTMLInputElement>(null);
 
-  const { execute: getQuote, isPending: isGettingQuote } = useGetQuoteFromDoc();
+  const {
+    execute: getQuote,
+    isPending: isGettingQuote,
+    errorMessage,
+  } = useGetQuoteFromDoc();
   const { data: bonds, isLoading: isLoadingBonds } = useGetBondsByWorkspace({
     workspaceId,
   });
@@ -142,7 +146,7 @@ export const QuoteAgentModal = ({
           toast.success("Información extraída exitosamente del PDF");
         },
         onError: () => {
-          toast.error("Error al extraer la información del PDF");
+          toast.error(errorMessage);
         },
       },
     );

@@ -1,7 +1,8 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { populateMember } from "./roles";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { bondErrors } from "./errors/bonds";
 
 export const update = mutation({
   args: {
@@ -11,13 +12,13 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(bondErrors.unauthorized);
 
     const bond = await ctx.db.get(args.id);
-    if (!bond) return null;
+    if (!bond) throw new ConvexError(bondErrors.notFound);
 
     const member = await populateMember(ctx, userId, bond.workspaceId);
-    if (!member) return null;
+    if (!member) throw new ConvexError(bondErrors.workspaceNotFound);
 
     await ctx.db.patch(args.id, {
       name: args.name,
@@ -34,13 +35,13 @@ export const remove = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(bondErrors.unauthorized);
 
     const bond = await ctx.db.get(args.id);
-    if (!bond) return null;
+    if (!bond) throw new ConvexError(bondErrors.notFound);
 
     const member = await populateMember(ctx, userId, bond.workspaceId);
-    if (!member) return null;
+    if (!member) throw new ConvexError(bondErrors.workspaceNotFound);
 
     await ctx.db.delete(args.id);
 
@@ -56,10 +57,10 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(bondErrors.unauthorized);
 
     const member = await populateMember(ctx, userId, args.workspaceId);
-    if (!member) return null;
+    if (!member) throw new ConvexError(bondErrors.workspaceNotFound);
 
     const bondId = await ctx.db.insert("bonds", {
       name: args.name,

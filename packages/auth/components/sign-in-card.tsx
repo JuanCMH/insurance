@@ -1,19 +1,20 @@
 "use client";
 
-import { useAuthActions } from "@convex-dev/auth/react";
-import { RiGoogleFill } from "@remixicon/react";
 import { useState } from "react";
+import { RiGoogleFill } from "@remixicon/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardHeader,
   CardContent,
   CardDescription,
-  CardHeader,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import type { SignInFlow } from "../types";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 interface SignInCardProps {
   setState: (state: SignInFlow) => void;
@@ -30,7 +31,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
     e.preventDefault();
     setPending(true);
     signIn("password", { email, password, flow: "signIn" })
-      .catch(() => toast.error("Correo o contraseña incorrectos"))
+      .catch((err) => toast.error(getErrorMessage(err)))
       .finally(() => setPending(false));
   };
 

@@ -1,9 +1,10 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import quoteAgent from "./agents";
 import { populateMember } from "./roles";
 import { action } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { quoteErrors } from "./errors/quotes";
 
 export const getQuoteFromDoc = action({
   args: { prompt: v.string() },
@@ -45,13 +46,13 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(quoteErrors.unauthorized);
 
     const quote = await ctx.db.get(args.id);
-    if (!quote) return null;
+    if (!quote) throw new ConvexError(quoteErrors.notFound);
 
     const member = await populateMember(ctx, userId, quote.workspaceId);
-    if (!member) return null;
+    if (!member) throw new ConvexError(quoteErrors.permissionDenied);
 
     await ctx.db.patch(args.id, {
       contractor: args.contractor,
@@ -101,10 +102,10 @@ export const remove = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(quoteErrors.unauthorized);
 
     const quote = await ctx.db.get(args.id);
-    if (!quote) return null;
+    if (!quote) throw new ConvexError(quoteErrors.notFound);
 
     const quoteBonds = await await ctx.db
       .query("quoteBonds")
@@ -112,7 +113,7 @@ export const remove = mutation({
       .collect();
 
     const member = await populateMember(ctx, userId, quote.workspaceId);
-    if (!member) return null;
+    if (!member) throw new ConvexError(quoteErrors.permissionDenied);
 
     for (const quoteBond of quoteBonds) {
       await ctx.db.delete(quoteBond._id);
@@ -154,13 +155,13 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    if (userId === null) throw new ConvexError(quoteErrors.unauthorized);
 
     const workspace = await ctx.db.get(args.workspaceId);
-    if (!workspace) return null;
+    if (!workspace) throw new ConvexError(quoteErrors.workspaceNotFound);
 
     const member = await populateMember(ctx, userId, args.workspaceId);
-    if (!member) return null;
+    if (!member) throw new ConvexError(quoteErrors.permissionDenied);
 
     const quoteId = await ctx.db.insert("quotes", {
       contractor: args.contractor,

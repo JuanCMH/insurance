@@ -2,6 +2,7 @@
 
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
+import { getErrorMessage } from "@/lib/get-error-message";
 import {
   RiEditFill,
   RiArrowLeftLine,
@@ -32,6 +33,7 @@ import { generateQuotePDF } from "@/packages/quotes/lib/export-quote-pdf";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
 import { useGetWorkspace } from "@/packages/workspaces/api";
+import { AegisLogo } from "@/components/logo";
 
 const QuoteIdPage = () => {
   const router = useRouter();
@@ -41,7 +43,11 @@ const QuoteIdPage = () => {
   const { data: workspace, isLoading: isLoadingWorkspace } = useGetWorkspace({
     id: workspaceId,
   });
-  const { mutate: updateQuote, isPending: isUpdatingQuote } = useUpdateQuote();
+  const {
+    mutate: updateQuote,
+    isPending: isUpdatingQuote,
+    errorMessage,
+  } = useUpdateQuote();
 
   const { data: quote, isLoading: isLoadingQuote } = useGetQuoteById({
     id: quoteId,
@@ -174,8 +180,8 @@ const QuoteIdPage = () => {
           setEditMode(false);
           toast.success("Cotización actualizada exitosamente");
         },
-        onError: () => {
-          toast.error("Error al actualizar la cotización");
+        onError: (error) => {
+          toast.error(getErrorMessage(error));
         },
       },
     );
@@ -235,8 +241,8 @@ const QuoteIdPage = () => {
           setEditMode(false);
           toast.success("Cotización actualizada exitosamente");
         },
-        onError: () => {
-          toast.error("Error al actualizar la cotización");
+        onError: (error) => {
+          toast.error(getErrorMessage(error));
         },
       },
     );
@@ -304,7 +310,6 @@ const QuoteIdPage = () => {
                 </div>
                 <Button
                   size="sm"
-                  variant="outline"
                   onClick={() => {
                     generateQuotePDF({
                       expenses,
